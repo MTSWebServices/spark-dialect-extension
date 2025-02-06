@@ -3,7 +3,12 @@ services:
   test-clickhouse:
     image: ${CLICKHOUSE_IMAGE:-clickhouse/clickhouse-server:latest-alpine}
     restart: unless-stopped
+    environment:
+      TZ: UTC
+      CLICKHOUSE_DB: spark
+      CLICKHOUSE_USER: spark
+      CLICKHOUSE_PASSWORD: 123UsedForTestOnly@!
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
     ports:
       - 8123:8123
       - 9001:9000
-
