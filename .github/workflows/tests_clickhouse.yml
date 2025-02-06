@@ -18,6 +18,10 @@ jobs:
         image: clickhouse/clickhouse-server
         env:
           TZ: UTC
+          CLICKHOUSE_DB: spark
+          CLICKHOUSE_USER: spark
+          CLICKHOUSE_PASSWORD: 123UsedForTestOnly@!
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
         ports:
           - 8123:8123
     steps:
