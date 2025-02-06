@@ -66,6 +66,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -96,6 +98,8 @@ class ClickhouseDialectTest
     df.write
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .option("user", jdbcUser)
       .option("password", jdbcPassword)
@@ -105,6 +109,8 @@ class ClickhouseDialectTest
     val loadedDf = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -119,6 +125,8 @@ class ClickhouseDialectTest
     df.write
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .option("user", jdbcUser)
       .option("password", jdbcPassword)
@@ -129,6 +137,8 @@ class ClickhouseDialectTest
     val loadedDf = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -142,6 +152,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -158,6 +170,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -175,6 +189,8 @@ class ClickhouseDialectTest
     df.write
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .option("user", jdbcUser)
       .option("password", jdbcPassword)
@@ -201,6 +217,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -217,6 +235,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -233,6 +253,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -249,6 +271,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -266,6 +290,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -282,6 +308,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -301,6 +329,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -320,6 +350,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -340,6 +372,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -359,6 +393,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -378,6 +414,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -399,6 +437,8 @@ class ClickhouseDialectTest
     df.write
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .option("user", jdbcUser)
       .option("password", jdbcPassword)
@@ -426,6 +466,8 @@ class ClickhouseDialectTest
     df.write
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .option("user", jdbcUser)
       .option("password", jdbcPassword)
