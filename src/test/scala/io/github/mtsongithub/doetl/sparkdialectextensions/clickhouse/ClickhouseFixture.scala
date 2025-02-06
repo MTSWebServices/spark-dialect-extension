@@ -11,20 +11,18 @@ trait ClickhouseFixture extends BeforeAndAfterEach { self: Suite =>
 
   val jdbcHostname: String = dotenv.get("CH_HOST")
   val jdbcPort: String = dotenv.get("CH_PORT")
-  val jdbcPortClient: String = dotenv.get("CH_PORT_CLIENT")
   val database: String = dotenv.get("CH_DATABASE")
   val jdbcUser: String = dotenv.get("CH_USER")
   val jdbcPassword: String = dotenv.get("CH_PASSWORD")
   var tableName: String = _
   val jdbcUrl: String = s"jdbc:clickhouse://$jdbcHostname:${jdbcPort}/$database"
 
-  val connectionProps = new java.util.Properties()
   var connection: Connection = _
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     tableName = Random.alphanumeric.take(10).mkString
-    connection = DriverManager.getConnection(jdbcUrl, connectionProps)
+    connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword)
   }
 
   def setupTable(tableSchema: String, engine: String = "TinyLog"): Unit = {

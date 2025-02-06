@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       clickhouse:
-        image: clickhouse/clickhouse-server
+        image: clickhouse/clickhouse-server:latest-alpine
         env:
           TZ: UTC
           CLICKHOUSE_DB: spark
