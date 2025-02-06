@@ -36,12 +36,12 @@ dependencies {
     testImplementation "com.vladsch.flexmark:flexmark-all:0.64.8"
     testImplementation "org.mockito:mockito-scala_2.12:1.17.37"
     // latest compatible with Java 8
-    testImplementation "io.github.cdimascio:dotenv-java:2.3.2"
+    testImplementation "io.github.cdimascio:dotenv-java:3.1.0"
 
     // Clickhouse dependency
-    testImplementation "com.clickhouse:clickhouse-jdbc:0.6.0-patch5"
-    testImplementation "org.apache.httpcomponents.client5:httpclient5:5.3.1"
-    testImplementation "org.apache.httpcomponents.core5:httpcore5:5.1.5"
+    testImplementation "com.clickhouse:clickhouse-jdbc:0.7.2"
+    testImplementation "org.apache.httpcomponents.client5:httpclient5:5.4.2"
+    testImplementation "org.apache.httpcomponents.core5:httpcore5:5.3.3"
 }
 
 ext {
