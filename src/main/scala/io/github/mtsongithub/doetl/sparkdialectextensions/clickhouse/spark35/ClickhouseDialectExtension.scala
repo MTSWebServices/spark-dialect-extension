@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 package io.github.mtsongithub.doetl.sparkdialectextensions.clickhouse.spark35
 
-import org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils
+import org.apache.spark.sql.execution.datasources.jdbc.{JdbcOptionsInWrite, JdbcUtils}
 import org.apache.spark.sql.jdbc.{JdbcDialect, JdbcType}
 import org.apache.spark.sql.types._
 import org.slf4j.LoggerFactory
-import java.sql.Types
+import java.sql.{Statement, Types}
 import scala.util.matching.Regex
 
 private object ClickhouseDialectExtension extends JdbcDialect {
@@ -19,6 +19,7 @@ private object ClickhouseDialectExtension extends JdbcDialect {
   private val dateTimeTypePattern: Regex = """(?i)^DateTime(\d+)?(?:\((\d+)\))?$""".r
   private val decimalTypePattern: Regex = """(?i)^Decimal\((\d+),\s*(\d+)\)$""".r
   private val decimalTypePattern2: Regex = """(?i)^Decimal(32|64|128|256)\((\d+)\)$""".r
+  private val columnPattern: Regex = """"([^"]+)"\s+(.+?)(?:\s+(NOT\s+NULL))?\s*(?=(?:\s*,\s*"|$))""".r
 
   override def canHandle(url: String): Boolean = {
     url.startsWith("jdbc:clickhouse")
@@ -165,14 +166,42 @@ private object ClickhouseDialectExtension extends JdbcDialect {
     case TimestampType =>
       logger.debug("Custom mapping applied: Datetime64(6) for 'TimestampType'")
       Some(JdbcType("Datetime64(6)", Types.TIMESTAMP))
-    case ArrayType(et, _) =>
+    case ArrayType(et, nullable) =>
       logger.debug("Custom mapping applied: Array[T] for ArrayType(T)")
       getJDBCType(et)
         .orElse(JdbcUtils.getCommonJDBCType(et))
-        .map(jdbcType => JdbcType(s"Array(${jdbcType.databaseTypeDefinition})", Types.ARRAY))
+        .map(jdbcType =>
+          if (nullable) {
+            logger.debug(
+              s"Mapping to Nullable type for Array: Nullable(${jdbcType.databaseTypeDefinition})")
+            JdbcType(s"Array(Nullable(${jdbcType.databaseTypeDefinition}))", Types.ARRAY)
+          } else
+            JdbcType(s"Array(${jdbcType.databaseTypeDefinition})", Types.ARRAY))
     case _ =>
       logger.debug(
         s"No custom JDBC type mapping for DataType: ${dt.simpleString}, default driver mapping is used")
       None
+  }
+
+  override def createTable(
+      statement: Statement,
+      tableName: String,
+      strSchema: String,
+      options: JdbcOptionsInWrite): Unit = {
+    statement.executeUpdate(s"CREATE TABLE $tableName (${parseColumnDefinitions(strSchema)}) ${options.createTableOptions}")
+  }
+
+  private def parseColumnDefinitions(columnDefinitions: String): String = {
+    columnPattern.findAllMatchIn(columnDefinitions).flatMap { matchResult =>
+      val columnName = matchResult.group(1)
+      val columnType = matchResult.group(2)
+      val notNull = matchResult.group(3)
+
+      if (arrayTypePattern.findFirstIn(columnType).isDefined || notNull != null) {
+        Some(s""""$columnName" $columnType NOT NULL""")
+      } else {
+        Some(s""""$columnName" Nullable($columnType)""")
+      }
+    }.mkString(", ")
   }
 }
