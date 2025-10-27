@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 package io.github.mtsongithub.doetl.sparkdialectextensions.clickhouse.spark35
 
-import org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils
+import org.apache.spark.sql.execution.datasources.jdbc.{JdbcOptionsInWrite, JdbcUtils}
 import org.apache.spark.sql.jdbc.{JdbcDialect, JdbcType}
 import org.apache.spark.sql.types._
 import org.slf4j.LoggerFactory
-import java.sql.Types
+import java.sql.{Statement, Types}
 import scala.util.matching.Regex
 
 private object ClickhouseDialectExtension extends JdbcDialect {
@@ -19,6 +19,12 @@ private object ClickhouseDialectExtension extends JdbcDialect {
   private val dateTimeTypePattern: Regex = """(?i)^DateTime(\d+)?(?:\((\d+)\))?$""".r
   private val decimalTypePattern: Regex = """(?i)^Decimal\((\d+),\s*(\d+)\)$""".r
   private val decimalTypePattern2: Regex = """(?i)^Decimal(32|64|128|256)\((\d+)\)$""".r
+  /**
+   * A pattern to match ClickHouse column definitions. This pattern captures the column name, data type, and whether it is nullable.
+   * @example
+   *  "column_name" String NOT NULL, "column_name" Int32, "column_name" Decimal(10,2) etc.
+   */
+  private val columnPattern: Regex = """"([^"]+)"\s+(.+?)(?:\s+(NOT\s+NULL))?\s*(?=(?:\s*,\s*"|$))""".r
 
   override def canHandle(url: String): Boolean = {
     url.startsWith("jdbc:clickhouse")
@@ -165,14 +171,77 @@ private object ClickhouseDialectExtension extends JdbcDialect {
     case TimestampType =>
       logger.debug("Custom mapping applied: Datetime64(6) for 'TimestampType'")
       Some(JdbcType("Datetime64(6)", Types.TIMESTAMP))
-    case ArrayType(et, _) =>
+    case ArrayType(et, nullable) =>
       logger.debug("Custom mapping applied: Array[T] for ArrayType(T)")
       getJDBCType(et)
         .orElse(JdbcUtils.getCommonJDBCType(et))
-        .map(jdbcType => JdbcType(s"Array(${jdbcType.databaseTypeDefinition})", Types.ARRAY))
+        .map(jdbcType =>
+          if (nullable) {
+            logger.debug(
+              s"Mapping to Nullable type for Array: Nullable(${jdbcType.databaseTypeDefinition})")
+            JdbcType(s"Array(Nullable(${jdbcType.databaseTypeDefinition}))", Types.ARRAY)
+          } else
+            JdbcType(s"Array(${jdbcType.databaseTypeDefinition})", Types.ARRAY))
     case _ =>
       logger.debug(
         s"No custom JDBC type mapping for DataType: ${dt.simpleString}, default driver mapping is used")
       None
+  }
+
+  /**
+   * Custom implementation of `createTable` to handle specific ClickHouse table creation options.
+   * This method ensures that the column schemas are formatted correctly for ClickHouse,
+   * particularly by wrapping nullable types appropriately, as the default implementation
+   * does not support `Nullable` types for column schemas in ClickHouse.
+   *
+   * @see
+   *    ›https://github.com/apache/spark/blob/branch-3.5/sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/jdbc/JdbcUtils.scala#L919-L923
+   *
+   * @see
+   *    https://github.com/apache/spark/blob/branch-3.5/sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/jdbc/JdbcUtils.scala#L823-L824
+   *
+   * @param statement
+   *   The SQL statement object used to execute the table creation command.
+   * @param tableName
+   *   The name of the table to be created in the ClickHouse database.
+   * @param strSchema
+   *   A string representing the schema definitions for the table's columns.
+   * @param options
+   *   Additional options for creating the table.
+   */
+  override def createTable(
+      statement: Statement,
+      tableName: String,
+      strSchema: String,
+      options: JdbcOptionsInWrite): Unit = {
+    statement.executeUpdate(s"CREATE TABLE $tableName (${parseColumnDefinitions(strSchema)}) ${options.createTableOptions}")
+  }
+
+  /**
+   * Parses column definitions from a raw string to format them for ClickHouse.
+   * This method transforms a string describing columns (including names, types, and constraints)
+   * into a proper SQL format, ensuring that NOT NULL constraints are applied correctly.
+   *
+   * @param columnDefinitions
+   *   A raw string representing the column definitions, formatted as "column_name column_type [NOT NULL]".
+   * @return
+   *   A formatted string of column definitions ready for SQL execution.
+   *
+   * @example
+   *   Input: "id" Integer NOT NULL, "name" String, "tags" Array(Nullable(String)) <br>
+   *   Output: "id" Integer NOT NULL, "name" Nullable(String), "tags" Array(Nullable(String))
+   */
+  private def parseColumnDefinitions(columnDefinitions: String): String = {
+    columnPattern.findAllMatchIn(columnDefinitions).flatMap { matchResult =>
+      val columnName = matchResult.group(1)
+      val columnType = matchResult.group(2)
+      val notNull = matchResult.group(3)
+
+      if (arrayTypePattern.findFirstIn(columnType).isDefined || notNull != null) {
+        Some(s""""$columnName" $columnType""")
+      } else {
+        Some(s""""$columnName" Nullable($columnType)""")
+      }
+    }.mkString(", ")
   }
 }
