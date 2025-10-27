@@ -238,7 +238,7 @@ private object ClickhouseDialectExtension extends JdbcDialect {
       val notNull = matchResult.group(3)
 
       if (arrayTypePattern.findFirstIn(columnType).isDefined || notNull != null) {
-        Some(s""""$columnName" $columnType NOT NULL""")
+        Some(s""""$columnName" $columnType""")
       } else {
         Some(s""""$columnName" Nullable($columnType)""")
       }
