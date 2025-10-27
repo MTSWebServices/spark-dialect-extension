@@ -12,7 +12,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 
 class ClickhouseDialectTest
-  extends AnyFunSuite
+    extends AnyFunSuite
     with Matchers
     with SharedSparkSession
     with TableDrivenPropertyChecks
