@@ -14,6 +14,7 @@ trait ClickhouseFixture extends BeforeAndAfterEach { self: Suite =>
   val database: String = dotenv.get("CH_DATABASE")
   val jdbcUser: String = dotenv.get("CH_USER")
   val jdbcPassword: String = dotenv.get("CH_PASSWORD")
+  val driverVersion: String = System.getProperty("CLICKHOUSE_JDBC_VERSION")
   var tableName: String = _
   val jdbcUrl: String = s"jdbc:clickhouse://$jdbcHostname:${jdbcPort}/$database"
 
