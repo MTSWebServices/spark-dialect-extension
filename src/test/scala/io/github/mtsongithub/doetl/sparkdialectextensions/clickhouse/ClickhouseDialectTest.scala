@@ -551,7 +551,7 @@ class ClickhouseDialectTest
     assert(actualColumnType == "Nullable(Bool)")
   }
 
-  val testReadArrayCasesV092 = Table(
+  val testReadArrayCasesV0_9_X = Table(
     ("columnDefinition", "insertedData", "expectedType"),
     (
       "charArrayColumn Array(String)",
@@ -574,7 +574,7 @@ class ClickhouseDialectTest
       "([1, 2, 3, 4, 5])",
       ArrayType(LongType, containsNull = false)))
 
-  val testReadArrayCasesV072 = Table(
+  val testReadArrayCasesV0_7_2 = Table(
     ("columnDefinition", "insertedData", "expectedType"),
     (
       "charArrayColumn Array(String)",
@@ -585,7 +585,7 @@ class ClickhouseDialectTest
       "([1.23, 2.34, 3.45, 4.56, 5.67])",
       ArrayType(DecimalType(9, 2), containsNull = false)))
 
-  forAll(if (driverVersion.startsWith("0.9")) testReadArrayCasesV092 else testReadArrayCasesV072) {
+  forAll(if (driverVersion.startsWith("0.9")) testReadArrayCasesV0_9_X  else testReadArrayCasesV0_7_2) {
     (columnDefinition: String, insertedData: String, expectedType: DataType) =>
       test(s"read ClickHouse Array for ${columnDefinition} column") {
         setupTable(columnDefinition)
@@ -606,7 +606,7 @@ class ClickhouseDialectTest
       }
   }
 
-  val testReadArrayUnsupportedCasesV072 = Table(
+  val testReadArrayUnsupportedCasesV0_7_2 = Table(
     ("columnDefinition", "insertedData", "expectedType", "errorMessage"),
     // https://github.com/ClickHouse/clickhouse-java/issues/1754
     (
@@ -641,7 +641,7 @@ class ClickhouseDialectTest
       ArrayType(TimestampType, containsNull = false),
       "class [Ljava.time.LocalDateTime; cannot be cast to class [Ljava.sql.Timestamp;"))
 
-  val testReadArrayUnsupportedCasesV092 = Table(
+  val testReadArrayUnsupportedCasesV0_9_X = Table(
     ("columnDefinition", "insertedData", "expectedType", "errorMessage"),
     (
       "decimalArrayColumn Array(Decimal(9,2))",
@@ -660,7 +660,7 @@ class ClickhouseDialectTest
       ArrayType(TimestampType, containsNull = false),
       "class [Ljava.lang.Object; cannot be cast to class [Ljava.sql.Timestamp;"))
 
-  forAll(if (driverVersion.startsWith("0.9")) testReadArrayUnsupportedCasesV092 else testReadArrayUnsupportedCasesV072) {
+  forAll(if (driverVersion.startsWith("0.9")) testReadArrayUnsupportedCasesV0_9_X else testReadArrayUnsupportedCasesV0_7_2) {
     (
       columnDefinition: String,
       insertedData: String,

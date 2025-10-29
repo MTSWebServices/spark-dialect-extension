@@ -39,7 +39,7 @@ dependencies {
     testImplementation "io.github.cdimascio:dotenv-java:3.1.0"
 
     // Clickhouse dependency
-    testImplementation ("com.clickhouse:clickhouse-jdbc:${project.properties['clickhouse.jdbc.version']}") {
+    testImplementation ("com.clickhouse:clickhouse-jdbc:${project.properties['clickhouse.jdbc.version']}:all") {
         exclude group: "org.antlr", module: "antlr4-runtime"
     }
     testImplementation "org.apache.httpcomponents.client5:httpclient5:5.4.2"
