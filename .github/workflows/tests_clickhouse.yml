@@ -16,6 +16,9 @@ jobs:
   build:
     name: Tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        clickhouse-jdbc-version: ['0.7.2', '0.9.2']
     services:
       clickhouse:
         image: clickhouse/clickhouse-server:latest-alpine
@@ -48,7 +51,7 @@ jobs:
 
       - name: Run Integration Tests with Coverage
         run: |
-          ./gradlew test
+          ./gradlew test -Dclickhouse.jdbc.version=${{ matrix.clickhouse-jdbc-version }}
 
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v4
