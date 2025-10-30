@@ -7,7 +7,9 @@
 
 This repository adds custom Spark JDBC dialects, enhansing or fixing Apache Spark issues with handling some JDBC types.
 
-**Note**: for now only Spark 3.5.x is supported.
+**Notes:**
+- for now only Spark 3.5.x is supported.
+- for now Clickhouse JDBC Driver 0.6.x, 0.7.x and 0.9.x is supported.
 
 ## Documentation Index
 

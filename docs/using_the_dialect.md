@@ -2,6 +2,7 @@
 
 This section provides instructions on how to configure Apache Spark to use the Spark Dialect Extension, enabling custom handling of JDBC data types.
 
+It is possible to use versions 0.6.x, 0.7.x, and 0.9.x of the Clickhouse JDBC Driver.
 ### Using onETL with PySpark
 
 See [onETL documentation](https://onetl.readthedocs.io) for installation instructions.
