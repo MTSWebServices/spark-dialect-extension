@@ -14,6 +14,7 @@ trait ClickhouseFixture extends BeforeAndAfterEach { self: Suite =>
   val database: String = dotenv.get("CH_DATABASE")
   val jdbcUser: String = dotenv.get("CH_USER")
   val jdbcPassword: String = dotenv.get("CH_PASSWORD")
+  val driverVersion: String = System.getProperty("CLICKHOUSE_JDBC_VERSION")
   var tableName: String = _
   val jdbcUrl: String = s"jdbc:clickhouse://$jdbcHostname:${jdbcPort}/$database"
 
@@ -27,12 +28,8 @@ trait ClickhouseFixture extends BeforeAndAfterEach { self: Suite =>
 
   def setupTable(tableSchema: String, engine: String = "TinyLog"): Unit = {
     val statement = connection.createStatement()
-    val commands =
-      s"""
-      |DROP TABLE IF EXISTS $tableName;
-      |CREATE TABLE $tableName ($tableSchema) ENGINE = $engine;
-    """.stripMargin
-    statement.executeUpdate(commands)
+    statement.executeUpdate(s"DROP TABLE IF EXISTS $tableName")
+    statement.executeUpdate(s"CREATE TABLE $tableName ($tableSchema) ENGINE = $engine")
     statement.close()
   }
 

@@ -551,7 +551,30 @@ class ClickhouseDialectTest
     assert(actualColumnType == "Nullable(Bool)")
   }
 
-  val testReadArrayCases = Table(
+  val testReadArrayCasesV0_9_X = Table(
+    ("columnDefinition", "insertedData", "expectedType"),
+    (
+      "charArrayColumn Array(String)",
+      "(['a', 'b', 'c', 'd', 'e'])",
+      ArrayType(StringType, containsNull = false)),
+    (
+      "byteArrayColumn Array(Int8)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(ByteType, containsNull = false)),
+    (
+      "shortArrayColumn Array(Int16)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(ShortType, containsNull = false)),
+    (
+      "intArrayColumn Array(Int32)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(IntegerType, containsNull = false)),
+    (
+      "longArrayColumn Array(Int64)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(LongType, containsNull = false)))
+
+  val testReadArrayCasesV0_7_X = Table(
     ("columnDefinition", "insertedData", "expectedType"),
     (
       "charArrayColumn Array(String)",
@@ -562,7 +585,7 @@ class ClickhouseDialectTest
       "([1.23, 2.34, 3.45, 4.56, 5.67])",
       ArrayType(DecimalType(9, 2), containsNull = false)))
 
-  forAll(testReadArrayCases) {
+  forAll(if (driverVersion.startsWith("0.9")) testReadArrayCasesV0_9_X  else testReadArrayCasesV0_7_X) {
     (columnDefinition: String, insertedData: String, expectedType: DataType) =>
       test(s"read ClickHouse Array for ${columnDefinition} column") {
         setupTable(columnDefinition)
@@ -583,7 +606,7 @@ class ClickhouseDialectTest
       }
   }
 
-  val testReadArrayUnsupportedCases = Table(
+  val testReadArrayUnsupportedCasesV0_7_X = Table(
     ("columnDefinition", "insertedData", "expectedType", "errorMessage"),
     // https://github.com/ClickHouse/clickhouse-java/issues/1754
     (
@@ -618,7 +641,26 @@ class ClickhouseDialectTest
       ArrayType(TimestampType, containsNull = false),
       "class [Ljava.time.LocalDateTime; cannot be cast to class [Ljava.sql.Timestamp;"))
 
-  forAll(testReadArrayUnsupportedCases) {
+  val testReadArrayUnsupportedCasesV0_9_X = Table(
+    ("columnDefinition", "insertedData", "expectedType", "errorMessage"),
+    (
+      "decimalArrayColumn Array(Decimal(9,2))",
+      "([1.23, 2.34, 3.45, 4.56, 5.67])",
+      ArrayType(DecimalType(9, 2), containsNull = false),
+      "class [Ljava.lang.Object; cannot be cast to class [Ljava.math.BigDecimal;"),
+    // https://github.com/ClickHouse/clickhouse-java/issues/1409
+    (
+      "dateArrayColumn Array(Date)",
+      "(['2024-01-01', '2024-01-02', '2024-01-03'])",
+      ArrayType(DateType, containsNull = false),
+      "class [Ljava.lang.Object; cannot be cast to class [Ljava.sql.Date;"),
+    (
+      "datetimeArrayColumn Array(DateTime64(6))",
+      "(['2024-01-01T00:00:00.000000', '2024-01-02T11:11:11.111111', '2024-01-03.2222222'])",
+      ArrayType(TimestampType, containsNull = false),
+      "class [Ljava.lang.Object; cannot be cast to class [Ljava.sql.Timestamp;"))
+
+  forAll(if (driverVersion.startsWith("0.9")) testReadArrayUnsupportedCasesV0_9_X else testReadArrayUnsupportedCasesV0_7_X) {
     (
       columnDefinition: String,
       insertedData: String,
