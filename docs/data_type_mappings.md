@@ -39,6 +39,9 @@ Primitive types:
 | `Array(Int16) (Only 0.9.x)`                  | `ArrayType(ShortType)`         | `Array(Int16)`          | `Array(Int16)`           |
 | `Array(Int32) (Only 0.9.x)`                  | `ArrayType(IntegerType)`       | `Array(Int32)`          | `Array(Int32)`           |
 | `Array(Int64) (Only 0.9.x)`                  | `ArrayType(LongType)`          | `Array(Int64)`          | `Array(Int64)`           |
+| `Array(UInt8) (Only 0.9.x)`                  | `ArrayType(ShortType)`         | `Array(UInt8)`          | `Array(UInt8)`           |
+| `Array(UInt16) (Only 0.9.x)`                 | `ArrayType(IntegerType)`       | `Array(UInt16)`         | `Array(UInt16)`          |
+| `Array(UInt32) (Only 0.9.x)`                 | `ArrayType(LongType)`          | `Array(Int64)`          | `Array(Int64)`           |
 | `Array(Decimal(M, N)) (Only 0.6.x or 0.7.x)` | `ArrayType(DecimalType(M, N))` | `Array(Decimal(M, N))`  | `Array(Decimal(M, N))`   |
 | unsupported                                  | `ArrayType(FloatType)`         | `Array(Float32)`        | `Array(Float32)`         |
 | `Array(Float64) (Only 0.9.x)`                | `ArrayType(DoubleType)`        | `Array(Float64)`        | `Array(Float64)`         |
