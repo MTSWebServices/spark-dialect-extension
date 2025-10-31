@@ -42,7 +42,7 @@ Primitive types:
 | `Array(UInt8) (Only 0.9.x)`                  | `ArrayType(ShortType)`           | `Array(UInt8)`          | `Array(UInt8)`           |
 | `Array(UInt16) (Only 0.9.x)`                 | `ArrayType(IntegerType)`         | `Array(UInt16)`         | `Array(UInt16)`          |
 | `Array(UInt32) (Only 0.9.x)`                 | `ArrayType(LongType)`            | `Array(Int64)`          | `Array(Int64)`           |
-| unsupported                                  | `ArrayType(DecimalType(20, 0))`  | `Array(Decimal(20, 0))` | `Array(Decimal(20, 0))`  |
+| `Array(UInt64)` unsupported                  | `ArrayType(DecimalType(20, 0))`  | `Array(Decimal(20, 0))` | `Array(Decimal(20, 0))`  |
 | `Array(Decimal(M, N)) (Only 0.6.x or 0.7.x)` | `ArrayType(DecimalType(M, N))`   | `Array(Decimal(M, N))`  | `Array(Decimal(M, N))`   |
 | unsupported                                  | `ArrayType(FloatType)`           | `Array(Float32)`        | `Array(Float32)`         |
 | `Array(Float64) (Only 0.9.x)`                | `ArrayType(DoubleType)`          | `Array(Float64)`        | `Array(Float64)`         |
