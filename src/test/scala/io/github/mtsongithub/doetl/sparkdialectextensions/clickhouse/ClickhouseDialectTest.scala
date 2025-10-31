@@ -725,6 +725,12 @@ class ClickhouseDialectTest
       "([1, 2, 3, 4, 5])",
       ArrayType(LongType, containsNull = false),
       "class [I cannot be cast to class [Ljava.lang.Object"),
+    (
+      "UInt64Column Array(UInt64)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(DecimalType(20,0), containsNull = false),
+      "class [J cannot be cast to class [Ljava.math.BigDecimal"
+    ),
     // https://github.com/ClickHouse/clickhouse-java/issues/1409
     (
       "dateArrayColumn Array(Date)",
@@ -759,7 +765,12 @@ class ClickhouseDialectTest
       "floatColumn Array(Float32)",
       "([(1.1), (2.2), (3.3), (4.4), (5.5)])",
       ArrayType(FloatType, containsNull = false),
-      "class java.lang.Double cannot be cast to class java.lang.Float"))
+      "class java.lang.Double cannot be cast to class java.lang.Float"),
+    (
+      "UInt64Column Array(UInt64)",
+      "([(1), (2), (3), (4), (5)])",
+      ArrayType(DecimalType(20, 0), containsNull = false),
+      "class [Ljava.lang.Object; cannot be cast to class [Ljava.math.BigDecimal;"))
 
   forAll(if (driverVersion.startsWith("0.9")) testReadArrayUnsupportedCasesV0_9_X else testReadArrayUnsupportedCasesV0_7_X) {
     (
