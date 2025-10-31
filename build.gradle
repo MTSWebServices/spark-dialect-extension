@@ -42,8 +42,6 @@ dependencies {
     testImplementation ("com.clickhouse:clickhouse-jdbc:${project.properties['clickhouse.jdbc.version']}${project.properties['clickhouse.jdbc.version']?.startsWith('0.9') ? ':all' : ''}") {
         exclude group: "org.antlr", module: "antlr4-runtime"
     }
-    testImplementation "org.apache.httpcomponents.client5:httpclient5:5.4.2"
-    testImplementation "org.apache.httpcomponents.core5:httpcore5:5.3.3"
 }
 
 ext {

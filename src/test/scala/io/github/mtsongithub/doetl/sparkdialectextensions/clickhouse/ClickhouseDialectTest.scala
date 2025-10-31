@@ -183,15 +183,17 @@ class ClickhouseDialectTest
 
   test("read ClickHouse Int32 as Spark IntegerType") {
     setupTable("integerColumn Int32")
-    insertTestData(Seq("(-2147483648)", "(2147483647)")) // min and max values for a signed integer
+    insertTestData(
+      Seq("(-2147483648)", "(2147483647)")
+    ) // min and max values for a signed integer
 
     val df = spark.read
-        .format("jdbc")
-        .option("url", jdbcUrl)
-        .option("user", jdbcUser)
-        .option("password", jdbcPassword)
-        .option("dbtable", tableName)
-        .load()
+      .format("jdbc")
+      .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("dbtable", tableName)
+      .load()
 
     assert(df.schema.fields.head.dataType == IntegerType)
 
@@ -201,15 +203,17 @@ class ClickhouseDialectTest
 
   test("read ClickHouse Int64 as Spark LongType") {
     setupTable("longColumn Int64")
-    insertTestData(Seq("(-9223372036854775808)", "(9223372036854775807)")) // min and max values for a signed long
+    insertTestData(
+      Seq("(-9223372036854775808)", "(9223372036854775807)")
+    ) // min and max values for a signed long
 
     val df = spark.read
-        .format("jdbc")
-        .option("url", jdbcUrl)
-        .option("user", jdbcUser)
-        .option("password", jdbcPassword)
-        .option("dbtable", tableName)
-        .load()
+      .format("jdbc")
+      .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("dbtable", tableName)
+      .load()
 
     assert(df.schema.fields.head.dataType == LongType)
 
@@ -305,17 +309,20 @@ class ClickhouseDialectTest
     insertTestData(Seq("(0)", "(18446744073709551615)")) // min and max values
 
     val df = spark.read
-        .format("jdbc")
-        .option("url", jdbcUrl)
-        .option("user", jdbcUser)
-        .option("password", jdbcPassword)
-        .option("dbtable", tableName)
-        .load()
+      .format("jdbc")
+      .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("dbtable", tableName)
+      .load()
 
-    assert(df.schema.fields.head.dataType == DecimalType(20,0))
+    assert(df.schema.fields.head.dataType == DecimalType(20, 0))
 
     val data = df.collect().map(_.getDecimal(0)).sorted
-    assert(data sameElements Array(new java.math.BigDecimal(0), new java.math.BigDecimal("18446744073709551615")))
+    assert(
+      data sameElements Array(
+        new java.math.BigDecimal(0),
+        new java.math.BigDecimal("18446744073709551615")))
   }
 
   test("read ClickHouse Float32 as Spark FloatType") {
@@ -563,7 +570,8 @@ class ClickhouseDialectTest
   }
 
   test("write Spark Nullable(TimestampType) as ClickHouse Nullable(Datetime64(6))") {
-    val schema = StructType(Seq(StructField("nullableTimestampColumn", TimestampType, nullable = true)))
+    val schema =
+      StructType(Seq(StructField("nullableTimestampColumn", TimestampType, nullable = true)))
     val currentTime = new java.sql.Timestamp(System.currentTimeMillis())
     val data = Seq(Row(null), Row(currentTime))
     val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
@@ -585,7 +593,8 @@ class ClickhouseDialectTest
   }
 
   test("write Spark Nullable(BooleanType) as ClickHouse Nullable(Bool)") {
-    val schema = StructType(Seq(StructField("nullableBooleanColumn", BooleanType, nullable = true)))
+    val schema =
+      StructType(Seq(StructField("nullableBooleanColumn", BooleanType, nullable = true)))
     val data = Seq(Row(null), Row(true), Row(false))
     val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
 
@@ -642,8 +651,7 @@ class ClickhouseDialectTest
     (
       "longArrayColumn Array(UInt32)",
       "([1, 2, 3, 4, 5])",
-      ArrayType(LongType, containsNull = false)),
-  )
+      ArrayType(LongType, containsNull = false)))
 
   val testReadArrayCasesV0_7_X = Table(
     ("columnDefinition", "insertedData", "expectedType"),
@@ -656,7 +664,8 @@ class ClickhouseDialectTest
       "([1.23, 2.34, 3.45, 4.56, 5.67])",
       ArrayType(DecimalType(9, 2), containsNull = false)))
 
-  forAll(if (driverVersion.startsWith("0.9")) testReadArrayCasesV0_9_X  else testReadArrayCasesV0_7_X) {
+  forAll(
+    if (driverVersion.startsWith("0.9")) testReadArrayCasesV0_9_X else testReadArrayCasesV0_7_X) {
     (columnDefinition: String, insertedData: String, expectedType: DataType) =>
       test(s"read ClickHouse Array for ${columnDefinition} column") {
         setupTable(columnDefinition)
@@ -728,9 +737,8 @@ class ClickhouseDialectTest
     (
       "UInt64Column Array(UInt64)",
       "([1, 2, 3, 4, 5])",
-      ArrayType(DecimalType(20,0), containsNull = false),
-      "class [J cannot be cast to class [Ljava.math.BigDecimal"
-    ),
+      ArrayType(DecimalType(20, 0), containsNull = false),
+      "class [J cannot be cast to class [Ljava.math.BigDecimal"),
     // https://github.com/ClickHouse/clickhouse-java/issues/1409
     (
       "dateArrayColumn Array(Date)",
@@ -772,12 +780,14 @@ class ClickhouseDialectTest
       ArrayType(DecimalType(20, 0), containsNull = false),
       "class [Ljava.lang.Object; cannot be cast to class [Ljava.math.BigDecimal;"))
 
-  forAll(if (driverVersion.startsWith("0.9")) testReadArrayUnsupportedCasesV0_9_X else testReadArrayUnsupportedCasesV0_7_X) {
+  forAll(
+    if (driverVersion.startsWith("0.9")) testReadArrayUnsupportedCasesV0_9_X
+    else testReadArrayUnsupportedCasesV0_7_X) {
     (
-      columnDefinition: String,
-      insertedData: String,
-      expectedType: DataType,
-      errorMessage: String) =>
+        columnDefinition: String,
+        insertedData: String,
+        expectedType: DataType,
+        errorMessage: String) =>
       test(s"cannot read ClickHouse Array for ${columnDefinition} column") {
         setupTable(columnDefinition)
         insertTestData(Seq(insertedData))
@@ -965,7 +975,8 @@ class ClickhouseDialectTest
         expectedType: DataType,
         expectedClickhouseType: String,
         nullable: Boolean) =>
-      test(s"write ClickHouse Array for  ${if (nullable) s" ${columnName} Nullable" else columnName} column"){
+      test(
+        s"write ClickHouse Array for  ${if (nullable) s" ${columnName} Nullable" else columnName} column") {
 
         val schema = StructType(Array(StructField(columnName, expectedType, nullable = nullable)))
         val df = spark.createDataFrame(spark.sparkContext.parallelize(insertedData), schema)
