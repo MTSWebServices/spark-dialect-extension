@@ -2,9 +2,9 @@
 
 * Added support for Clickhouse JDBC 0.9.x.
 
-  This allows using ``Array(T)`` for numeric ``T``, like ``Int16``, ``Int32``, ``Int64``.
+  This allows using ``Array(T)`` for numeric ``T``, like ``Int16``, ``Int32``, ``Int64``, ``Float64``.
 
-  But ``Date``, ``DateTime`` and ``UInt64`` are not supported, see [issue](https://github.com/ClickHouse/clickhouse-java/issues/2457).
+  But ``Date``, ``DateTime`` and ``Decimal`` are not supported, see [issue](https://github.com/ClickHouse/clickhouse-java/issues/2457).
 
 * Wrap with ``Nullable(T)`` Spark DataFrame columns with ``nullable = true``.
   
