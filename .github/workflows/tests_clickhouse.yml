@@ -9,15 +9,25 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        clickhouse-jdbc-version: ['0.7.2', '0.9.2']
     services:
       clickhouse:
-        image: clickhouse/clickhouse-server
+        image: clickhouse/clickhouse-server:latest-alpine
         env:
           TZ: UTC
+          CLICKHOUSE_DB: spark
+          CLICKHOUSE_USER: spark
+          CLICKHOUSE_PASSWORD: 123UsedForTestOnly@!
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
         ports:
           - 8123:8123
     steps:
@@ -41,7 +51,7 @@ jobs:
 
       - name: Run Integration Tests with Coverage
         run: |
-          ./gradlew test
+          ./gradlew test -Dclickhouse.jdbc.version=${{ matrix.clickhouse-jdbc-version }}
 
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v4

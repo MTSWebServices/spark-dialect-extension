@@ -66,6 +66,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -96,6 +98,8 @@ class ClickhouseDialectTest
     df.write
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .option("user", jdbcUser)
       .option("password", jdbcPassword)
@@ -105,6 +109,8 @@ class ClickhouseDialectTest
     val loadedDf = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -119,6 +125,8 @@ class ClickhouseDialectTest
     df.write
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .option("user", jdbcUser)
       .option("password", jdbcPassword)
@@ -129,6 +137,8 @@ class ClickhouseDialectTest
     val loadedDf = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -142,6 +152,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -158,6 +170,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -167,14 +181,56 @@ class ClickhouseDialectTest
     assert(data sameElements Array(-32768, 32767))
   }
 
+  test("read ClickHouse Int32 as Spark IntegerType") {
+    setupTable("integerColumn Int32")
+    insertTestData(
+      Seq("(-2147483648)", "(2147483647)")
+    ) // min and max values for a signed integer
+
+    val df = spark.read
+      .format("jdbc")
+      .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("dbtable", tableName)
+      .load()
+
+    assert(df.schema.fields.head.dataType == IntegerType)
+
+    val data = df.collect().map(_.getInt(0)).sorted
+    assert(data sameElements Array(-2147483648, 2147483647))
+  }
+
+  test("read ClickHouse Int64 as Spark LongType") {
+    setupTable("longColumn Int64")
+    insertTestData(
+      Seq("(-9223372036854775808)", "(9223372036854775807)")
+    ) // min and max values for a signed long
+
+    val df = spark.read
+      .format("jdbc")
+      .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("dbtable", tableName)
+      .load()
+
+    assert(df.schema.fields.head.dataType == LongType)
+
+    val data = df.collect().map(_.getLong(0)).sorted
+    assert(data sameElements Array(-9223372036854775808L, 9223372036854775807L))
+  }
+
   test("write Spark ShortType as ClickHouse Int16") {
-    val schema = StructType(Seq(StructField("shortColumn", ShortType, nullable = true)))
+    val schema = StructType(Seq(StructField("shortColumn", ShortType, nullable = false)))
     val data = Seq(Row(Short.MinValue), Row(Short.MaxValue))
     val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
 
     df.write
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .option("user", jdbcUser)
       .option("password", jdbcPassword)
@@ -201,6 +257,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -217,6 +275,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -233,6 +293,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -242,6 +304,27 @@ class ClickhouseDialectTest
     assert(data sameElements Array(0L, 4294967295L))
   }
 
+  test("read Clickhouse UInt64 as Spark DecimalType") {
+    setupTable("UInt64Column UInt64")
+    insertTestData(Seq("(0)", "(18446744073709551615)")) // min and max values
+
+    val df = spark.read
+      .format("jdbc")
+      .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("dbtable", tableName)
+      .load()
+
+    assert(df.schema.fields.head.dataType == DecimalType(20, 0))
+
+    val data = df.collect().map(_.getDecimal(0)).sorted
+    assert(
+      data sameElements Array(
+        new java.math.BigDecimal(0),
+        new java.math.BigDecimal("18446744073709551615")))
+  }
+
   test("read ClickHouse Float32 as Spark FloatType") {
     setupTable("floatColumn Float32")
     insertTestData(Seq("(-1.23)", "(4.56)"))
@@ -249,6 +332,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -266,6 +351,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -282,6 +369,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -301,6 +390,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -320,6 +411,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -340,6 +433,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -359,6 +454,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -378,6 +475,8 @@ class ClickhouseDialectTest
     val df = spark.read
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .load()
 
@@ -391,7 +490,7 @@ class ClickhouseDialectTest
   }
 
   test("write Spark TimestampType as ClickHouse Datetime64(6)") {
-    val schema = StructType(Seq(StructField("timestampColumn", TimestampType, nullable = true)))
+    val schema = StructType(Seq(StructField("timestampColumn", TimestampType, nullable = false)))
     val currentTime = new java.sql.Timestamp(System.currentTimeMillis())
     val data = Seq(Row(currentTime))
     val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
@@ -399,6 +498,8 @@ class ClickhouseDialectTest
     df.write
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .option("user", jdbcUser)
       .option("password", jdbcPassword)
@@ -419,13 +520,15 @@ class ClickhouseDialectTest
   }
 
   test("write Spark BooleanType as ClickHouse Bool") {
-    val schema = StructType(Seq(StructField("booleanColumn", BooleanType, nullable = true)))
+    val schema = StructType(Seq(StructField("booleanColumn", BooleanType, nullable = false)))
     val data = Seq(Row(true), Row(false))
     val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
 
     df.write
       .format("jdbc")
       .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
       .option("dbtable", tableName)
       .option("user", jdbcUser)
       .option("password", jdbcPassword)
@@ -445,7 +548,112 @@ class ClickhouseDialectTest
     statement.close()
   }
 
-  val testReadArrayCases = Table(
+  test("write Spark Nullable(ShortType) as ClickHouse Nullable(Int16)") {
+    val schema = StructType(Seq(StructField("nullableShortColumn", ShortType, nullable = true)))
+    val data = Seq(Row(null), Row(Short.MinValue), Row(Short.MaxValue))
+    val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
+
+    df.write
+      .format("jdbc")
+      .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("dbtable", tableName)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("createTableOptions", "ENGINE = TinyLog")
+      .mode("errorIfExists")
+      .save()
+
+    val actualColumnType = getColumnType("nullableShortColumn")
+    assert(actualColumnType == "Nullable(Int16)")
+  }
+
+  test("write Spark Nullable(TimestampType) as ClickHouse Nullable(Datetime64(6))") {
+    val schema =
+      StructType(Seq(StructField("nullableTimestampColumn", TimestampType, nullable = true)))
+    val currentTime = new java.sql.Timestamp(System.currentTimeMillis())
+    val data = Seq(Row(null), Row(currentTime))
+    val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
+
+    df.write
+      .format("jdbc")
+      .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("dbtable", tableName)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("createTableOptions", "ENGINE = TinyLog")
+      .mode("errorIfExists")
+      .save()
+
+    val actualColumnType = getColumnType("nullableTimestampColumn")
+    assert(actualColumnType == "Nullable(DateTime64(6))")
+  }
+
+  test("write Spark Nullable(BooleanType) as ClickHouse Nullable(Bool)") {
+    val schema =
+      StructType(Seq(StructField("nullableBooleanColumn", BooleanType, nullable = true)))
+    val data = Seq(Row(null), Row(true), Row(false))
+    val df = spark.createDataFrame(spark.sparkContext.parallelize(data), schema)
+
+    df.write
+      .format("jdbc")
+      .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("dbtable", tableName)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("createTableOptions", "ENGINE = TinyLog")
+      .mode("errorIfExists")
+      .save()
+
+    val actualColumnType = getColumnType("nullableBooleanColumn")
+    assert(actualColumnType == "Nullable(Bool)")
+  }
+
+  val testReadArrayCasesV0_9_X = Table(
+    ("columnDefinition", "insertedData", "expectedType"),
+    (
+      "charArrayColumn Array(String)",
+      "(['a', 'b', 'c', 'd', 'e'])",
+      ArrayType(StringType, containsNull = false)),
+    (
+      "byteArrayColumn Array(Int8)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(ByteType, containsNull = false)),
+    (
+      "shortArrayColumn Array(Int16)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(ShortType, containsNull = false)),
+    (
+      "intArrayColumn Array(Int32)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(IntegerType, containsNull = false)),
+    (
+      "longArrayColumn Array(Int64)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(LongType, containsNull = false)),
+    (
+      "doubleArrayColumn Array(Float64)",
+      "([1.1, 2.2, 3.3, 4.4, 5.5])",
+      ArrayType(DoubleType, containsNull = false)),
+    (
+      "shortArrayColumn Array(UInt8)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(ShortType, containsNull = false)),
+    (
+      "intArrayColumn Array(UInt16)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(IntegerType, containsNull = false)),
+    (
+      "longArrayColumn Array(UInt32)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(LongType, containsNull = false)))
+
+  val testReadArrayCasesV0_7_X = Table(
     ("columnDefinition", "insertedData", "expectedType"),
     (
       "charArrayColumn Array(String)",
@@ -456,7 +664,8 @@ class ClickhouseDialectTest
       "([1.23, 2.34, 3.45, 4.56, 5.67])",
       ArrayType(DecimalType(9, 2), containsNull = false)))
 
-  forAll(testReadArrayCases) {
+  forAll(
+    if (driverVersion.startsWith("0.9")) testReadArrayCasesV0_9_X else testReadArrayCasesV0_7_X) {
     (columnDefinition: String, insertedData: String, expectedType: DataType) =>
       test(s"read ClickHouse Array for ${columnDefinition} column") {
         setupTable(columnDefinition)
@@ -465,6 +674,8 @@ class ClickhouseDialectTest
         val df = spark.read
           .format("jdbc")
           .option("url", jdbcUrl)
+          .option("user", jdbcUser)
+          .option("password", jdbcPassword)
           .option("dbtable", tableName)
           .load()
 
@@ -475,7 +686,7 @@ class ClickhouseDialectTest
       }
   }
 
-  val testReadArrayUnsupportedCases = Table(
+  val testReadArrayUnsupportedCasesV0_7_X = Table(
     ("columnDefinition", "insertedData", "expectedType", "errorMessage"),
     // https://github.com/ClickHouse/clickhouse-java/issues/1754
     (
@@ -498,6 +709,36 @@ class ClickhouseDialectTest
       "([1, 2, 3, 4, 5])",
       ArrayType(LongType, containsNull = false),
       "class [J cannot be cast to class [Ljava.lang.Object"),
+    (
+      "floatArrayColumn Array(Float32)",
+      "([1.1, 2.2, 3.3, 4.4, 5.5])",
+      ArrayType(FloatType, containsNull = false),
+      "class [F cannot be cast to class [Ljava.lang.Object;"),
+    (
+      "doubleArrayColumn Array(Float64)",
+      "([1.1, 2.2, 3.3, 4.4, 5.5])",
+      ArrayType(DoubleType, containsNull = false),
+      "class [D cannot be cast to class [Ljava.lang.Object;"),
+    (
+      "shortArrayColumn Array(UInt8)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(ShortType, containsNull = false),
+      "class [B cannot be cast to class [Ljava.lang.Object"),
+    (
+      "intArrayColumn Array(UInt16)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(IntegerType, containsNull = false),
+      "class [S cannot be cast to class [Ljava.lang.Object"),
+    (
+      "longArrayColumn Array(UInt32)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(LongType, containsNull = false),
+      "class [I cannot be cast to class [Ljava.lang.Object"),
+    (
+      "UInt64Column Array(UInt64)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(DecimalType(20, 0), containsNull = false),
+      "class [J cannot be cast to class [Ljava.math.BigDecimal"),
     // https://github.com/ClickHouse/clickhouse-java/issues/1409
     (
       "dateArrayColumn Array(Date)",
@@ -510,7 +751,38 @@ class ClickhouseDialectTest
       ArrayType(TimestampType, containsNull = false),
       "class [Ljava.time.LocalDateTime; cannot be cast to class [Ljava.sql.Timestamp;"))
 
-  forAll(testReadArrayUnsupportedCases) {
+  val testReadArrayUnsupportedCasesV0_9_X = Table(
+    ("columnDefinition", "insertedData", "expectedType", "errorMessage"),
+    (
+      "decimalArrayColumn Array(Decimal(9,2))",
+      "([1.23, 2.34, 3.45, 4.56, 5.67])",
+      ArrayType(DecimalType(9, 2), containsNull = false),
+      "class [Ljava.lang.Object; cannot be cast to class [Ljava.math.BigDecimal;"),
+    // https://github.com/ClickHouse/clickhouse-java/issues/1409
+    (
+      "dateArrayColumn Array(Date)",
+      "(['2024-01-01', '2024-01-02', '2024-01-03'])",
+      ArrayType(DateType, containsNull = false),
+      "class [Ljava.lang.Object; cannot be cast to class [Ljava.sql.Date;"),
+    (
+      "datetimeArrayColumn Array(DateTime64(6))",
+      "(['2024-01-01T00:00:00.000000', '2024-01-02T11:11:11.111111', '2024-01-03.2222222'])",
+      ArrayType(TimestampType, containsNull = false),
+      "class [Ljava.lang.Object; cannot be cast to class [Ljava.sql.Timestamp;"),
+    (
+      "floatColumn Array(Float32)",
+      "([(1.1), (2.2), (3.3), (4.4), (5.5)])",
+      ArrayType(FloatType, containsNull = false),
+      "class java.lang.Double cannot be cast to class java.lang.Float"),
+    (
+      "UInt64Column Array(UInt64)",
+      "([(1), (2), (3), (4), (5)])",
+      ArrayType(DecimalType(20, 0), containsNull = false),
+      "class [Ljava.lang.Object; cannot be cast to class [Ljava.math.BigDecimal;"))
+
+  forAll(
+    if (driverVersion.startsWith("0.9")) testReadArrayUnsupportedCasesV0_9_X
+    else testReadArrayUnsupportedCasesV0_7_X) {
     (
         columnDefinition: String,
         insertedData: String,
@@ -524,6 +796,8 @@ class ClickhouseDialectTest
         val df = spark.read
           .format("jdbc")
           .option("url", jdbcUrl)
+          .option("user", jdbcUser)
+          .option("password", jdbcPassword)
           .option("dbtable", tableName)
           .load()
 
@@ -539,42 +813,127 @@ class ClickhouseDialectTest
   }
 
   val testWriteArrayCases = Table(
-    ("columnName", "insertedData", "expectedType", "expectedClickhouseType"),
+    ("columnName", "insertedData", "expectedType", "expectedClickhouseType", "nullable"),
+    (
+      "nullableCharArrayColumn",
+      Seq(Row(Array(null, "a", "b", "c", "d", "e"))),
+      ArrayType(StringType, containsNull = true),
+      "Array(Nullable(String))",
+      true),
+    (
+      "nullableByteArrayColumn",
+      Seq(Row(Array(null, 1.toByte, 2.toByte, 3.toByte, 4.toByte, 5.toByte))),
+      ArrayType(ByteType, containsNull = true),
+      "Array(Nullable(Int8))",
+      true),
+    (
+      "nullableShortArrayColumn",
+      Seq(Row(Array(null, 1.toShort, 2.toShort, 3.toShort, 4.toShort, 5.toShort))),
+      ArrayType(ShortType, containsNull = true),
+      "Array(Nullable(Int16))",
+      true),
+    (
+      "nullableIntArrayColumn",
+      Seq(Row(Array(null, 1, 2, 3, 4, 5))),
+      ArrayType(IntegerType, containsNull = true),
+      "Array(Nullable(Int32))",
+      true),
+    (
+      "nullableLongArrayColumn",
+      Seq(Row(Array(null, 1L, 2L, 3L, 4L, 5L))),
+      ArrayType(LongType, containsNull = true),
+      "Array(Nullable(Int64))",
+      true),
+    (
+      "nullableFloatArrayColumn",
+      Seq(Row(Array(null, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f))),
+      ArrayType(FloatType, containsNull = true),
+      "Array(Nullable(Float32))",
+      true),
+    (
+      "nullableDoubleArrayColumn",
+      Seq(Row(Array(null, 1.0d, 2.0d, 3.0d, 4.0d, 5.0d))),
+      ArrayType(DoubleType, containsNull = true),
+      "Array(Nullable(Float64))",
+      true),
+    (
+      "nullableDecimalArrayColumn",
+      Seq(
+        Row(Array(
+          null,
+          new java.math.BigDecimal("1.23"),
+          new java.math.BigDecimal("2.34"),
+          new java.math.BigDecimal("3.45"),
+          new java.math.BigDecimal("4.56"),
+          new java.math.BigDecimal("5.67")))),
+      ArrayType(DecimalType(9, 2), containsNull = true),
+      "Array(Nullable(Decimal(9, 2)))",
+      true),
+    (
+      "nullableDateArrayColumn",
+      Seq(
+        Row(
+          Array(
+            null,
+            java.sql.Date.valueOf("2022-01-01"),
+            java.sql.Date.valueOf("2022-01-02"),
+            java.sql.Date.valueOf("2022-01-03")))),
+      ArrayType(DateType, containsNull = true),
+      "Array(Nullable(Date))",
+      true),
+    (
+      "nullableDatetimeArrayColumn",
+      Seq(
+        Row(Array(
+          null,
+          java.sql.Timestamp.valueOf("2022-01-01 00:00:00.000000"),
+          java.sql.Timestamp.valueOf("2022-01-02 11:11:11.111111"),
+          java.sql.Timestamp.valueOf("2022-01-03 22:22:22.222222")))),
+      ArrayType(TimestampType, containsNull = true),
+      "Array(Nullable(DateTime64(6)))",
+      true),
     (
       "charArrayColumn",
       Seq(Row(Array("a", "b", "c", "d", "e"))),
       ArrayType(StringType, containsNull = false),
-      "Array(String)"),
+      "Array(String)",
+      false),
     (
       "byteArrayColumn",
       Seq(Row(Array(1.toByte, 2.toByte, 3.toByte, 4.toByte, 5.toByte))),
       ArrayType(ByteType, containsNull = false),
-      "Array(Int8)"),
+      "Array(Int8)",
+      false),
     (
       "shortArrayColumn",
       Seq(Row(Array(1.toShort, 2.toShort, 3.toShort, 4.toShort, 5.toShort))),
       ArrayType(ShortType, containsNull = false),
-      "Array(Int16)"),
+      "Array(Int16)",
+      false),
     (
       "intArrayColumn",
       Seq(Row(Array(1, 2, 3, 4, 5))),
       ArrayType(IntegerType, containsNull = false),
-      "Array(Int32)"),
+      "Array(Int32)",
+      false),
     (
       "longArrayColumn",
       Seq(Row(Array(1L, 2L, 3L, 4L, 5L))),
       ArrayType(LongType, containsNull = false),
-      "Array(Int64)"),
+      "Array(Int64)",
+      false),
     (
       "floatArrayColumn",
       Seq(Row(Array(1.0f, 2.0f, 3.0f, 4.0f, 5.0f))),
       ArrayType(FloatType, containsNull = false),
-      "Array(Float32)"),
+      "Array(Float32)",
+      false),
     (
       "doubleArrayColumn",
       Seq(Row(Array(1.0d, 2.0d, 3.0d, 4.0d, 5.0d))),
       ArrayType(DoubleType, containsNull = false),
-      "Array(Float64)"),
+      "Array(Float64)",
+      false),
     (
       "decimalArrayColumn",
       Seq(
@@ -585,7 +944,8 @@ class ClickhouseDialectTest
           new java.math.BigDecimal("4.56"),
           new java.math.BigDecimal("5.67")))),
       ArrayType(DecimalType(9, 2), containsNull = false),
-      "Array(Decimal(9, 2))"),
+      "Array(Decimal(9, 2))",
+      false),
     (
       "dateArrayColumn",
       Seq(
@@ -595,7 +955,8 @@ class ClickhouseDialectTest
             java.sql.Date.valueOf("2022-01-02"),
             java.sql.Date.valueOf("2022-01-03")))),
       ArrayType(DateType, containsNull = false),
-      "Array(Date)"),
+      "Array(Date)",
+      false),
     (
       "datetimeArrayColumn",
       Seq(
@@ -604,25 +965,28 @@ class ClickhouseDialectTest
           java.sql.Timestamp.valueOf("2022-01-02 11:11:11.111111"),
           java.sql.Timestamp.valueOf("2022-01-03 22:22:22.222222")))),
       ArrayType(TimestampType, containsNull = false),
-      "Array(DateTime64(6))"))
+      "Array(DateTime64(6))",
+      false))
 
   forAll(testWriteArrayCases) {
     (
         columnName: String,
         insertedData: Seq[Row],
         expectedType: DataType,
-        expectedClickhouseType: String) =>
-      test(s"write ClickHouse Array for $columnName column") {
+        expectedClickhouseType: String,
+        nullable: Boolean) =>
+      test(
+        s"write ClickHouse Array for  ${if (nullable) s" ${columnName} Nullable" else columnName} column") {
 
-        val schema = StructType(Array(StructField(columnName, expectedType, nullable = false)))
+        val schema = StructType(Array(StructField(columnName, expectedType, nullable = nullable)))
         val df = spark.createDataFrame(spark.sparkContext.parallelize(insertedData), schema)
 
         df.write
           .format("jdbc")
           .option("url", jdbcUrl)
-          .option("dbtable", tableName)
           .option("user", jdbcUser)
           .option("password", jdbcPassword)
+          .option("dbtable", tableName)
           .option("createTableOptions", "ENGINE = TinyLog")
           .mode("errorIfExists")
           .save()

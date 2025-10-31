@@ -2,6 +2,7 @@
 
 This documentation outlines the customized mappings that the Spark Dialect Extension implements that optimize interactions between Spark and ClickHouse.
 
+There is the possibility to use Nullable types.
 #### Customized Type Mappings with Spark Dialect Extension
 
 Primitive types:
@@ -31,18 +32,22 @@ Primitive types:
 
 ``Array(T)`` `->` ``ArrayType(T)`` (without this extension Spark does not support Arrays for GenericJDBC dialect):
 
-| ClickHouse Type (Read) | Spark Type                     | ClickHouse Type (Write) | ClickHouse Type (Create) |
-|------------------------|--------------------------------|-------------------------|--------------------------|
-| `Array(String)`        | `ArrayType(StringType)`        | `Array(String)`         | `Array(String)`          |
-| unsupported            | `ArrayType(ByteType)`          | `Array(Int8)`           | `Array(Int8)`            |
-| unsupported            | `ArrayType(ShortType)`         | `Array(Int16)`          | `Array(Int16)`           |
-| unsupported            | `ArrayType(IntegerType)`       | `Array(Int32)`          | `Array(Int32)`           |
-| unsupported            | `ArrayType(LongType)`          | `Array(Int64)`          | `Array(Int64)`           |
-| `Array(Decimal(M, N))` | `ArrayType(DecimalType(M, N))` | `Array(Decimal(M, N))`  | `Array(Decimal(M, N))`   |
-| unsupported            | `ArrayType(FloatType)`         | `Array(Float32)`        | `Array(Float32)`         |
-| unsupported            | `ArrayType(DoubleType)`        | `Array(Float64)`        | `Array(Float64)`         |
-| unsupported            | `ArrayType(Date)`              | `Array(Date)`           | `Array(Date)`            |
-| unsupported            | `ArrayType(TimestampType)`     | `Array(DateTime64(6))`  | `Array(DateTime64(6))`   |
+| ClickHouse Type (Read)                       | Spark Type                       | ClickHouse Type (Write) | ClickHouse Type (Create) |
+|----------------------------------------------|----------------------------------|-------------------------|--------------------------|
+| `Array(String)`                              | `ArrayType(StringType)`          | `Array(String)`         | `Array(String)`          |
+| `Array(Int8) (Only 0.9.x)`                   | `ArrayType(ByteType)`            | `Array(Int8)`           | `Array(Int8)`            |
+| `Array(Int16) (Only 0.9.x)`                  | `ArrayType(ShortType)`           | `Array(Int16)`          | `Array(Int16)`           |
+| `Array(Int32) (Only 0.9.x)`                  | `ArrayType(IntegerType)`         | `Array(Int32)`          | `Array(Int32)`           |
+| `Array(Int64) (Only 0.9.x)`                  | `ArrayType(LongType)`            | `Array(Int64)`          | `Array(Int64)`           |
+| `Array(UInt8) (Only 0.9.x)`                  | `ArrayType(ShortType)`           | `Array(UInt8)`          | `Array(UInt8)`           |
+| `Array(UInt16) (Only 0.9.x)`                 | `ArrayType(IntegerType)`         | `Array(UInt16)`         | `Array(UInt16)`          |
+| `Array(UInt32) (Only 0.9.x)`                 | `ArrayType(LongType)`            | `Array(Int64)`          | `Array(Int64)`           |
+| `Array(UInt64)` unsupported                  | `ArrayType(DecimalType(20, 0))`  | `Array(Decimal(20, 0))` | `Array(Decimal(20, 0))`  |
+| `Array(Decimal(M, N)) (Only 0.6.x or 0.7.x)` | `ArrayType(DecimalType(M, N))`   | `Array(Decimal(M, N))`  | `Array(Decimal(M, N))`   |
+| unsupported                                  | `ArrayType(FloatType)`           | `Array(Float32)`        | `Array(Float32)`         |
+| `Array(Float64) (Only 0.9.x)`                | `ArrayType(DoubleType)`          | `Array(Float64)`        | `Array(Float64)`         |
+| unsupported                                  | `ArrayType(Date)`                | `Array(Date)`           | `Array(Date)`            |
+| unsupported                                  | `ArrayType(TimestampType)`       | `Array(DateTime64(6))`  | `Array(DateTime64(6))`   |
 
 Reading issues are caused by Clickhouse JDBC implementation:
 * https://github.com/ClickHouse/clickhouse-java/issues/1754

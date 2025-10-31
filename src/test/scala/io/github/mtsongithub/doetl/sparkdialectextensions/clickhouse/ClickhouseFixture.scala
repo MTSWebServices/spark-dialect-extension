@@ -11,30 +11,25 @@ trait ClickhouseFixture extends BeforeAndAfterEach { self: Suite =>
 
   val jdbcHostname: String = dotenv.get("CH_HOST")
   val jdbcPort: String = dotenv.get("CH_PORT")
-  val jdbcPortClient: String = dotenv.get("CH_PORT_CLIENT")
   val database: String = dotenv.get("CH_DATABASE")
   val jdbcUser: String = dotenv.get("CH_USER")
   val jdbcPassword: String = dotenv.get("CH_PASSWORD")
+  val driverVersion: String = System.getProperty("CLICKHOUSE_JDBC_VERSION")
   var tableName: String = _
   val jdbcUrl: String = s"jdbc:clickhouse://$jdbcHostname:${jdbcPort}/$database"
 
-  val connectionProps = new java.util.Properties()
   var connection: Connection = _
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     tableName = Random.alphanumeric.take(10).mkString
-    connection = DriverManager.getConnection(jdbcUrl, connectionProps)
+    connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword)
   }
 
   def setupTable(tableSchema: String, engine: String = "TinyLog"): Unit = {
     val statement = connection.createStatement()
-    val commands =
-      s"""
-      |DROP TABLE IF EXISTS $tableName;
-      |CREATE TABLE $tableName ($tableSchema) ENGINE = $engine;
-    """.stripMargin
-    statement.executeUpdate(commands)
+    statement.executeUpdate(s"DROP TABLE IF EXISTS $tableName")
+    statement.executeUpdate(s"CREATE TABLE $tableName ($tableSchema) ENGINE = $engine")
     statement.close()
   }
 
