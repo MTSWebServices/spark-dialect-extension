@@ -48,16 +48,16 @@ After completing the tests, you can stop the Docker containers with:
 docker-compose -f docker-compose.test.yml down
 ```
 
-# Code Formatting and Linting
+## Code Formatting and Linting
 
-## Using Scalafmt to Format Code
+### Using Scalafmt to Format Code
 
 To format all Scala source files in the project, execute the following command from the project's root directory:
 ```bash
 ./gradlew scalafmtAll
 ```
 
-## Using Scalafix for Linting and Refactoring
+### Using Scalafix for Linting and Refactoring
 
 To lint and refactor the code, run Scalafix using the following command:
 ```bash
