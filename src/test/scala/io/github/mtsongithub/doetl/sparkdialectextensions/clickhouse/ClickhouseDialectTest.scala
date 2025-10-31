@@ -181,6 +181,42 @@ class ClickhouseDialectTest
     assert(data sameElements Array(-32768, 32767))
   }
 
+  test("read ClickHouse Int32 as Spark IntegerType") {
+    setupTable("integerColumn Int32")
+    insertTestData(Seq("(-2147483648)", "(2147483647)")) // min and max values for a signed integer
+
+    val df = spark.read
+        .format("jdbc")
+        .option("url", jdbcUrl)
+        .option("user", jdbcUser)
+        .option("password", jdbcPassword)
+        .option("dbtable", tableName)
+        .load()
+
+    assert(df.schema.fields.head.dataType == IntegerType)
+
+    val data = df.collect().map(_.getInt(0)).sorted
+    assert(data sameElements Array(-2147483648, 2147483647))
+  }
+
+  test("read ClickHouse Int64 as Spark LongType") {
+    setupTable("longColumn Int64")
+    insertTestData(Seq("(-9223372036854775808)", "(9223372036854775807)")) // min and max values for a signed long
+
+    val df = spark.read
+        .format("jdbc")
+        .option("url", jdbcUrl)
+        .option("user", jdbcUser)
+        .option("password", jdbcPassword)
+        .option("dbtable", tableName)
+        .load()
+
+    assert(df.schema.fields.head.dataType == LongType)
+
+    val data = df.collect().map(_.getLong(0)).sorted
+    assert(data sameElements Array(-9223372036854775808L, 9223372036854775807L))
+  }
+
   test("write Spark ShortType as ClickHouse Int16") {
     val schema = StructType(Seq(StructField("shortColumn", ShortType, nullable = false)))
     val data = Seq(Row(Short.MinValue), Row(Short.MaxValue))
@@ -262,6 +298,24 @@ class ClickhouseDialectTest
 
     val data = df.collect().map(_.getLong(0)).sorted
     assert(data sameElements Array(0L, 4294967295L))
+  }
+
+  test("read Clickhouse UInt64 as Spark DecimalType") {
+    setupTable("UInt64Column UInt64")
+    insertTestData(Seq("(0)", "(18446744073709551615)")) // min and max values
+
+    val df = spark.read
+        .format("jdbc")
+        .option("url", jdbcUrl)
+        .option("user", jdbcUser)
+        .option("password", jdbcPassword)
+        .option("dbtable", tableName)
+        .load()
+
+    assert(df.schema.fields.head.dataType == DecimalType(20,0))
+
+    val data = df.collect().map(_.getDecimal(0)).sorted
+    assert(data sameElements Array(new java.math.BigDecimal(0), new java.math.BigDecimal("18446744073709551615")))
   }
 
   test("read ClickHouse Float32 as Spark FloatType") {
@@ -572,7 +626,24 @@ class ClickhouseDialectTest
     (
       "longArrayColumn Array(Int64)",
       "([1, 2, 3, 4, 5])",
-      ArrayType(LongType, containsNull = false)))
+      ArrayType(LongType, containsNull = false)),
+    (
+      "doubleArrayColumn Array(Float64)",
+      "([1.1, 2.2, 3.3, 4.4, 5.5])",
+      ArrayType(DoubleType, containsNull = false)),
+    (
+      "shortArrayColumn Array(UInt8)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(ShortType, containsNull = false)),
+    (
+      "intArrayColumn Array(UInt16)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(IntegerType, containsNull = false)),
+    (
+      "longArrayColumn Array(UInt32)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(LongType, containsNull = false)),
+  )
 
   val testReadArrayCasesV0_7_X = Table(
     ("columnDefinition", "insertedData", "expectedType"),
@@ -629,6 +700,37 @@ class ClickhouseDialectTest
       "([1, 2, 3, 4, 5])",
       ArrayType(LongType, containsNull = false),
       "class [J cannot be cast to class [Ljava.lang.Object"),
+    (
+      "floatArrayColumn Array(Float32)",
+      "([1.1, 2.2, 3.3, 4.4, 5.5])",
+      ArrayType(FloatType, containsNull = false),
+      "class [F cannot be cast to class [Ljava.lang.Object;"),
+    (
+      "doubleArrayColumn Array(Float64)",
+      "([1.1, 2.2, 3.3, 4.4, 5.5])",
+      ArrayType(DoubleType, containsNull = false),
+      "class [D cannot be cast to class [Ljava.lang.Object;"),
+    (
+      "shortArrayColumn Array(UInt8)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(ShortType, containsNull = false),
+      "class [B cannot be cast to class [Ljava.lang.Object"),
+    (
+      "intArrayColumn Array(UInt16)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(IntegerType, containsNull = false),
+      "class [S cannot be cast to class [Ljava.lang.Object"),
+    (
+      "longArrayColumn Array(UInt32)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(LongType, containsNull = false),
+      "class [I cannot be cast to class [Ljava.lang.Object"),
+    (
+      "UInt64Column Array(UInt64)",
+      "([1, 2, 3, 4, 5])",
+      ArrayType(DecimalType(20,0), containsNull = false),
+      "class [J cannot be cast to class [Ljava.math.BigDecimal"
+    ),
     // https://github.com/ClickHouse/clickhouse-java/issues/1409
     (
       "dateArrayColumn Array(Date)",
@@ -658,7 +760,17 @@ class ClickhouseDialectTest
       "datetimeArrayColumn Array(DateTime64(6))",
       "(['2024-01-01T00:00:00.000000', '2024-01-02T11:11:11.111111', '2024-01-03.2222222'])",
       ArrayType(TimestampType, containsNull = false),
-      "class [Ljava.lang.Object; cannot be cast to class [Ljava.sql.Timestamp;"))
+      "class [Ljava.lang.Object; cannot be cast to class [Ljava.sql.Timestamp;"),
+    (
+      "floatColumn Array(Float32)",
+      "([(1.1), (2.2), (3.3), (4.4), (5.5)])",
+      ArrayType(FloatType, containsNull = false),
+      "class java.lang.Double cannot be cast to class java.lang.Float"),
+    (
+      "UInt64Column Array(UInt64)",
+      "([(1), (2), (3), (4), (5)])",
+      ArrayType(DecimalType(20, 0), containsNull = false),
+      "class [Ljava.lang.Object; cannot be cast to class [Ljava.math.BigDecimal;"))
 
   forAll(if (driverVersion.startsWith("0.9")) testReadArrayUnsupportedCasesV0_9_X else testReadArrayUnsupportedCasesV0_7_X) {
     (
