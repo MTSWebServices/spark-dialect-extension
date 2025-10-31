@@ -19,12 +19,15 @@ private object ClickhouseDialectExtension extends JdbcDialect {
   private val dateTimeTypePattern: Regex = """(?i)^DateTime(\d+)?(?:\((\d+)\))?$""".r
   private val decimalTypePattern: Regex = """(?i)^Decimal\((\d+),\s*(\d+)\)$""".r
   private val decimalTypePattern2: Regex = """(?i)^Decimal(32|64|128|256)\((\d+)\)$""".r
+
   /**
-   * A pattern to match ClickHouse column definitions. This pattern captures the column name, data type, and whether it is nullable.
+   * A pattern to match ClickHouse column definitions. This pattern captures the column name, data
+   * type, and whether it is nullable.
    * @example
-   *  "column_name" String NOT NULL, "column_name" Int32, "column_name" Decimal(10,2) etc.
+   *   "column_name" String NOT NULL, "column_name" Int32, "column_name" Decimal(10,2) etc.
    */
-  private val columnPattern: Regex = """"([^"]+)"\s+(.+?)(?:\s+(NOT\s+NULL))?\s*(?=(?:\s*,\s*"|$))""".r
+  private val columnPattern: Regex =
+    """"([^"]+)"\s+(.+?)(?:\s+(NOT\s+NULL))?\s*(?=(?:\s*,\s*"|$))""".r
 
   override def canHandle(url: String): Boolean = {
     url.startsWith("jdbc:clickhouse")
@@ -49,28 +52,20 @@ private object ClickhouseDialectExtension extends JdbcDialect {
       typeName: String,
       size: Int,
       md: MetadataBuilder): Option[DataType] = {
-    val scale = md.build.getLong("scale").toInt
     sqlType match {
       case Types.ARRAY =>
         unwrapNullable(typeName) match {
           case (_, arrayTypePattern(nestType)) =>
-            // due to https://github.com/ClickHouse/clickhouse-java/issues/1754, spark is not able to read Arrays of
-            // any types except Decimal(...) and String
-            toCatalystType(Types.ARRAY, nestType, size, scale, md).map {
-              case (nullable, dataType) => ArrayType(dataType, nullable)
+            toCatalystType(nestType).map { case (nullable, dataType) =>
+              ArrayType(dataType, nullable)
             }
           case _ => None
         }
-      case _ => toCatalystType(sqlType, typeName, size, scale, md).map(_._2)
+      case _ => toCatalystType(typeName).map(_._2)
     }
   }
 
-  private def toCatalystType(
-      sqlType: Int,
-      typeName: String,
-      precision: Int,
-      scale: Int,
-      md: MetadataBuilder): Option[(Boolean, DataType)] = {
+  private def toCatalystType(typeName: String): Option[(Boolean, DataType)] = {
     val (nullable, _typeName) = unwrapNullable(typeName)
     val dataType = _typeName match {
       case "String" =>
@@ -194,14 +189,14 @@ private object ClickhouseDialectExtension extends JdbcDialect {
   /**
    * Custom implementation of `createTable` to handle specific ClickHouse table creation options.
    * This method ensures that the column schemas are formatted correctly for ClickHouse,
-   * particularly by wrapping nullable types appropriately, as the default implementation
-   * does not support `Nullable` types for column schemas in ClickHouse.
+   * particularly by wrapping nullable types appropriately, as the default implementation does not
+   * support `Nullable` types for column schemas in ClickHouse.
    *
    * @see
-   *    ›https://github.com/apache/spark/blob/branch-3.5/sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/jdbc/JdbcUtils.scala#L919-L923
+   *   ›https://github.com/apache/spark/blob/branch-3.5/sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/jdbc/JdbcUtils.scala#L919-L923
    *
    * @see
-   *    https://github.com/apache/spark/blob/branch-3.5/sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/jdbc/JdbcUtils.scala#L823-L824
+   *   https://github.com/apache/spark/blob/branch-3.5/sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/jdbc/JdbcUtils.scala#L823-L824
    *
    * @param statement
    *   The SQL statement object used to execute the table creation command.
@@ -217,34 +212,39 @@ private object ClickhouseDialectExtension extends JdbcDialect {
       tableName: String,
       strSchema: String,
       options: JdbcOptionsInWrite): Unit = {
-    statement.executeUpdate(s"CREATE TABLE $tableName (${parseColumnDefinitions(strSchema)}) ${options.createTableOptions}")
+    statement.executeUpdate(
+      s"CREATE TABLE $tableName (${parseColumnDefinitions(strSchema)}) ${options.createTableOptions}")
   }
 
   /**
-   * Parses column definitions from a raw string to format them for ClickHouse.
-   * This method transforms a string describing columns (including names, types, and constraints)
-   * into a proper SQL format, ensuring that NOT NULL constraints are applied correctly.
+   * Parses column definitions from a raw string to format them for ClickHouse. This method
+   * transforms a string describing columns (including names, types, and constraints) into a
+   * proper SQL format, ensuring that NOT NULL constraints are applied correctly.
    *
    * @param columnDefinitions
-   *   A raw string representing the column definitions, formatted as "column_name column_type [NOT NULL]".
+   *   A raw string representing the column definitions, formatted as "column_name column_type
+   *   [NOT NULL]".
    * @return
    *   A formatted string of column definitions ready for SQL execution.
    *
    * @example
-   *   Input: "id" Integer NOT NULL, "name" String, "tags" Array(Nullable(String)) <br>
-   *   Output: "id" Integer NOT NULL, "name" Nullable(String), "tags" Array(Nullable(String))
+   *   Input: "id" Integer NOT NULL, "name" String, "tags" Array(Nullable(String)) <br> Output:
+   *   "id" Integer NOT NULL, "name" Nullable(String), "tags" Array(Nullable(String))
    */
   private def parseColumnDefinitions(columnDefinitions: String): String = {
-    columnPattern.findAllMatchIn(columnDefinitions).flatMap { matchResult =>
-      val columnName = matchResult.group(1)
-      val columnType = matchResult.group(2)
-      val notNull = matchResult.group(3)
+    columnPattern
+      .findAllMatchIn(columnDefinitions)
+      .flatMap { matchResult =>
+        val columnName = matchResult.group(1)
+        val columnType = matchResult.group(2)
+        val notNull = matchResult.group(3)
 
-      if (arrayTypePattern.findFirstIn(columnType).isDefined || notNull != null) {
-        Some(s""""$columnName" $columnType""")
-      } else {
-        Some(s""""$columnName" Nullable($columnType)""")
+        if (arrayTypePattern.findFirstIn(columnType).isDefined || notNull != null) {
+          Some(s""""$columnName" $columnType""")
+        } else {
+          Some(s""""$columnName" Nullable($columnType)""")
+        }
       }
-    }.mkString(", ")
+      .mkString(", ")
   }
 }
