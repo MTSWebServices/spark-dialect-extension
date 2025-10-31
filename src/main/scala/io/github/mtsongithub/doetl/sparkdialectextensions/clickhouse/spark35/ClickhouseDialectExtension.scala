@@ -88,6 +88,9 @@ private object ClickhouseDialectExtension extends JdbcDialect {
       case "UInt32" | "Int64" =>
         logger.debug(s"Custom mapping applied: LongType for '${_typeName}'")
         Some(LongType)
+      case "UInt64" =>
+        logger.debug(s"Custom mapping applied: DecimalType for '${_typeName}")
+        Some(DecimalType(20, 0))
       case "Int128" | "Int256" | "UInt256" =>
         logger.debug(s"Type '${_typeName}' is not supported")
         None

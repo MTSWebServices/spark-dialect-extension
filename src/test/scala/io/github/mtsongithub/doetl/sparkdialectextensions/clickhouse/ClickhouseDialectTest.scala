@@ -300,6 +300,24 @@ class ClickhouseDialectTest
     assert(data sameElements Array(0L, 4294967295L))
   }
 
+  test("read Clickhouse UInt64 as Spark DecimalType") {
+    setupTable("UInt64Column UInt64")
+    insertTestData(Seq("(0)", "(18446744073709551615)")) // min and max values
+
+    val df = spark.read
+        .format("jdbc")
+        .option("url", jdbcUrl)
+        .option("user", jdbcUser)
+        .option("password", jdbcPassword)
+        .option("dbtable", tableName)
+        .load()
+
+    assert(df.schema.fields.head.dataType == DecimalType(20,0))
+
+    val data = df.collect().map(_.getDecimal(0)).sorted
+    assert(data sameElements Array(new java.math.BigDecimal(0), new java.math.BigDecimal("18446744073709551615")))
+  }
+
   test("read ClickHouse Float32 as Spark FloatType") {
     setupTable("floatColumn Float32")
     insertTestData(Seq("(-1.23)", "(4.56)"))
