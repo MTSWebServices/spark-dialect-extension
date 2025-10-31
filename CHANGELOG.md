@@ -2,20 +2,20 @@
 
 * Added support for Clickhouse JDBC 0.9.x.
 
-  This allows using ``Array(T)`` for numeric ``T``, like ``Int16``, ``Int32``, ``Int64``, ``Float64``.
+  This allows using `Array(T)` for numeric `T`, like `Int16`, `Int32`, `Int64`, `Float64`.
 
-  But ``Date``, ``DateTime`` and ``Decimal`` are not supported, see [issue](https://github.com/ClickHouse/clickhouse-java/issues/2457).
+  But `Date`, `DateTime` and `Decimal` are not supported, see [issue](https://github.com/ClickHouse/clickhouse-java/issues/2457).
 
-* Wrap with ``Nullable(T)`` Spark DataFrame columns with ``nullable = true``.
+* Wrap with `Nullable(T)` Spark DataFrame columns with `nullable = true`.
   
-  Caveat - Spark DataFrames created from ORC and Parquet files have all columns with ``nullable = true``.
+  Caveat - Spark DataFrames created from ORC and Parquet files have all columns with `nullable = true`.
   Using:
   
   ```python
   df.write.format("jdbc").option("createTableOptions", "ENGINE = ReplacingMergeTree() ORDER BY (col1)")
   ```
   
-  will fail if ``col1`` is nullable. Workaround:
+  will fail if `col1` is nullable. Workaround:
   
   ```python
   import pyspark.sql.functions as F
