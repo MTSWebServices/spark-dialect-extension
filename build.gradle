@@ -127,9 +127,9 @@ mavenPublishing {
             }
         }
         scm {
-            connection = "scm:git:git://github.com/MobileTeleSystems/spark-dialect-extension.git"
-            developerConnection = "scm:git:ssh://github.com/MobileTeleSystems/spark-dialect-extension.git"
-            url = "https://github.com/MobileTeleSystems/spark-dialect-extension"
+            connection = "scm:git:git://github.com/MTSWebServices/spark-dialect-extension.git"
+            developerConnection = "scm:git:ssh://github.com/MTSWebServices/spark-dialect-extension.git"
+            url = "https://github.com/MTSWebServices/spark-dialect-extension"
         }
     }
 }
