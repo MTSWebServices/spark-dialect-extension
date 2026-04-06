@@ -145,6 +145,44 @@ class ClickhouseDialectTest
     assert(stripMetadata(loadedDf.schema) == stripMetadata(df.schema))
   }
 
+  test("test spark dataframe write to existing clickhouse table with truncate option") {
+
+    val generator = new ClickhouseDataframeGenerator(spark)
+    val df = generator.createDataFrame()
+
+    df.write
+      .format("jdbc")
+      .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("dbtable", tableName)
+      .option("createTableOptions", "ENGINE = Log")
+      .mode("errorIfExists")
+      .save()
+
+    df.write
+      .format("jdbc")
+      .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("dbtable", tableName)
+      .option("truncate", "true")
+      .mode("overwrite")
+      .save()
+
+    val loadedDf = spark.read
+      .format("jdbc")
+      .option("url", jdbcUrl)
+      .option("user", jdbcUser)
+      .option("password", jdbcPassword)
+      .option("dbtable", tableName)
+      .load()
+
+    assert(getTableEngine(tableName) == "Log")
+    assert(stripMetadata(loadedDf.schema) == stripMetadata(df.schema))
+    assert(loadedDf.count() == df.count())
+  }
+
   test("read ClickHouse Int8 as Spark ByteType") {
     setupTable("byteColumn Int8")
     insertTestData(Seq("(-128)", "(127)")) // min and max values for a signed byte

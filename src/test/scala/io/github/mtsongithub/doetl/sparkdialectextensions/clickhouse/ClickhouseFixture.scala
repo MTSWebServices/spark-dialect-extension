@@ -64,4 +64,24 @@ trait ClickhouseFixture extends BeforeAndAfterEach { self: Suite =>
     statement.close()
     columnType
   }
+
+  def getTableEngine(tableName: String): String = {
+    val query =
+      s"""
+         |SELECT engine
+         |FROM system.tables
+         |WHERE name = '$tableName'
+         |""".stripMargin
+
+    val statement = connection.createStatement()
+    val resultSet = statement.executeQuery(query)
+
+    resultSet.next()
+    val engine = resultSet.getString("engine")
+
+    resultSet.close()
+    statement.close()
+
+    engine
+  }
 }
