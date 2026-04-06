@@ -247,4 +247,6 @@ private object ClickhouseDialectExtension extends JdbcDialect {
       }
       .mkString(", ")
   }
+
+  override def isCascadingTruncateTable(): Option[Boolean] = Some(false)
 }
