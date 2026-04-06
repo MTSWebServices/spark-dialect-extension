@@ -95,18 +95,11 @@ jobs:
           pattern: coverage-*
           merge-multiple: true
 
-      - name: Show test results
-        uses: mikepenz/action-junit-report@v6
-        if: success() || failure() # always run even if the previous step fails
-        with:
-          report_paths: build/reports/jacoco/test/*.xml
-
       - name: Coverage comment
         id: coverage
         uses: madrapps/jacoco-report@v1.7.2
         with:
           paths: ${{ github.workspace }}/build/reports/jacoco/test/*.xml
-          token: ${{ secrets.AUTOMERGE_TOKEN }}
           min-coverage-overall: ${{ env.MIN_PROJECT_COVERAGE }}
           min-coverage-changed-files: ${{ env.MIN_FILE_COVERAGE }}
           title: Coverage
