@@ -67,7 +67,7 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v7
         with:
-          name: coverage-jdbc-${{ inputs.clickhouse-jdbc-version }}
+          name: coverage-jdbc-${{ matrix.clickhouse-jdbc-version }}
           path: build/reports/jacoco/test/*.xml
           # https://github.com/actions/upload-artifact/issues/602
           include-hidden-files: true
@@ -82,8 +82,7 @@ jobs:
       pull-requests: write
 
     if: success() || failure()
-    needs:
-      - tests
+    needs: [tests]
 
     steps:
       - name: Checkout code
