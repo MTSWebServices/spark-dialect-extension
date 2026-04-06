@@ -3,6 +3,7 @@
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Maven Central Version](https://img.shields.io/maven-central/v/io.github.mtsongithub.doetl/spark-dialect-extension_2.12)](https://central.sonatype.com/artifact/io.github.mtsongithub.doetl/spark-dialect-extension_2.12)
 [![Tests](https://github.com/MTSWebServices/spark-dialect-extension/actions/workflows/tests_clickhouse.yml/badge.svg)](https://github.com/MTSWebServices/spark-dialect-extension/actions)
+[![Test Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/MTSOnGithub/03e73a82ecc4709934540ce8201cc3b4/raw/onetl_badge.json)](https://github.com/MTSWebServices/onetl/actions)
 
 This repository adds custom Spark JDBC dialects, enhansing or fixing Apache Spark issues with handling some JDBC types.
 
