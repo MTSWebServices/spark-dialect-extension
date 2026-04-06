@@ -53,10 +53,3 @@ jobs:
       - name: Run Integration Tests with Coverage
         run: |
           ./gradlew test -Dclickhouse.jdbc.version=${{ matrix.clickhouse-jdbc-version }}
-
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: build/reports/jacoco/test/*.xml
-          fail_ci_if_error: true
