@@ -72,7 +72,7 @@ private object ClickhouseDialectExtension extends JdbcDialect {
         logger.debug(s"Custom mapping applied: StringType for '${_typeName}'")
         Some(StringType)
       case "Int8" =>
-        logger.debug(s"Custom mapping applied: ByteType for 'Int8'")
+        logger.debug(s"Custom mapping applied: ByteType for '${_typeName}'")
         Some(ByteType)
       case "UInt8" | "Int16" =>
         logger.debug(s"Custom mapping applied: ShortType for '${_typeName}'")
@@ -84,16 +84,16 @@ private object ClickhouseDialectExtension extends JdbcDialect {
         logger.debug(s"Custom mapping applied: LongType for '${_typeName}'")
         Some(LongType)
       case "UInt64" =>
-        logger.debug(s"Custom mapping applied: DecimalType for '${_typeName}")
-        Some(DecimalType(20, 0))
+        logger.debug(s"Custom mapping applied: DecimalType for '${_typeName}'")
+        Some(DecimalType(38, 0))
       case "Int128" | "Int256" | "UInt256" =>
         logger.debug(s"Type '${_typeName}' is not supported")
         None
       case "Float32" =>
-        logger.debug(s"Custom mapping applied: FloatType for 'Float32'")
+        logger.debug(s"Custom mapping applied: FloatType for '${_typeName}'")
         Some(FloatType)
       case "Float64" =>
-        logger.debug(s"Custom mapping applied: DoubleType for 'Float64'")
+        logger.debug(s"Custom mapping applied: DoubleType for '${_typeName}'")
         Some(DoubleType)
       case dateTypePattern() =>
         logger.debug(s"Custom mapping applied: DateType for '${_typeName}'")
@@ -108,23 +108,23 @@ private object ClickhouseDialectExtension extends JdbcDialect {
       case decimalTypePattern2(w, scale) =>
         w match {
           case "32" =>
-            logger.debug(s"Custom mapping applied: DecimalType(9, $scale) for 'Decimal$w'")
+            logger.debug(s"Custom mapping applied: DecimalType(9, $scale) for '${_typeName}'")
             Some(DecimalType(9, scale.toInt))
           case "64" =>
-            logger.debug(s"Custom mapping applied: DecimalType(18, $scale) for 'Decimal$w'")
+            logger.debug(s"Custom mapping applied: DecimalType(18, $scale) for '${_typeName}'")
             Some(DecimalType(18, scale.toInt))
           case "128" =>
-            logger.debug(s"Custom mapping applied: DecimalType(38, $scale) for 'Decimal$w'")
+            logger.debug(s"Custom mapping applied: DecimalType(38, $scale) for '${_typeName}'")
             Some(DecimalType(38, scale.toInt))
           case "256" =>
-            logger.debug(s"Custom mapping applied: DecimalType(76, $scale) for 'Decimal$w'")
+            logger.debug(s"Custom mapping applied: DecimalType(76, $scale) for '${_typeName}'")
             Some(
               DecimalType(76, scale.toInt)
             ) // throw exception, spark support precision up to 38
         }
       case _ =>
         logger.debug(
-          s"No custom mapping for typeName: ${_typeName}, default driver mapping is used")
+          s"No custom mapping for typeName '${_typeName}', default driver mapping is used")
         None
     }
     dataType.map((nullable, _))

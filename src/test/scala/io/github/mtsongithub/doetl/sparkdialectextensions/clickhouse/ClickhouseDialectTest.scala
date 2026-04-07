@@ -354,7 +354,7 @@ class ClickhouseDialectTest
       .option("dbtable", tableName)
       .load()
 
-    assert(df.schema.fields.head.dataType == DecimalType(20, 0))
+    assert(df.schema.fields.head.dataType == DecimalType(38, 0))
 
     val data = df.collect().map(_.getDecimal(0)).sorted
     assert(
@@ -689,7 +689,25 @@ class ClickhouseDialectTest
     (
       "longArrayColumn Array(UInt32)",
       "([1, 2, 3, 4, 5])",
-      ArrayType(LongType, containsNull = false)))
+      ArrayType(LongType, containsNull = false)),
+    // since 0.9.5 https://github.com/ClickHouse/clickhouse-java/pull/2627
+    (
+      "floatColumn Array(Float32)",
+      "([(1.1), (2.2), (3.3), (4.4), (5.5)])",
+      ArrayType(FloatType, containsNull = false)),
+    (
+      "decimalArrayColumn Array(Decimal(9,2))",
+      "([1.23, 2.34, 3.45, 4.56, 5.67])",
+      ArrayType(DecimalType(9, 2), containsNull = false)),
+    // since 0.8.6 https://github.com/ClickHouse/clickhouse-java/issues/1409
+    (
+      "dateArrayColumn Array(Date)",
+      "(['2024-01-01', '2024-01-02', '2024-01-03'])",
+      ArrayType(DateType, containsNull = false)),
+    (
+      "datetimeArrayColumn Array(DateTime64(6))",
+      "(['2024-01-01T00:00:00.000000', '2024-01-02T11:11:11.111111', '2024-01-03.2222222'])",
+      ArrayType(TimestampType, containsNull = false)))
 
   val testReadArrayCasesV0_7_X = Table(
     ("columnDefinition", "insertedData", "expectedType"),
@@ -775,7 +793,7 @@ class ClickhouseDialectTest
     (
       "UInt64Column Array(UInt64)",
       "([1, 2, 3, 4, 5])",
-      ArrayType(DecimalType(20, 0), containsNull = false),
+      ArrayType(DecimalType(38, 0), containsNull = false),
       "class [J cannot be cast to class [Ljava.math.BigDecimal"),
     // https://github.com/ClickHouse/clickhouse-java/issues/1409
     (
@@ -792,31 +810,10 @@ class ClickhouseDialectTest
   val testReadArrayUnsupportedCasesV0_9_X = Table(
     ("columnDefinition", "insertedData", "expectedType", "errorMessage"),
     (
-      "decimalArrayColumn Array(Decimal(9,2))",
-      "([1.23, 2.34, 3.45, 4.56, 5.67])",
-      ArrayType(DecimalType(9, 2), containsNull = false),
-      "class [Ljava.lang.Object; cannot be cast to class [Ljava.math.BigDecimal;"),
-    // https://github.com/ClickHouse/clickhouse-java/issues/1409
-    (
-      "dateArrayColumn Array(Date)",
-      "(['2024-01-01', '2024-01-02', '2024-01-03'])",
-      ArrayType(DateType, containsNull = false),
-      "class [Ljava.lang.Object; cannot be cast to class [Ljava.sql.Date;"),
-    (
-      "datetimeArrayColumn Array(DateTime64(6))",
-      "(['2024-01-01T00:00:00.000000', '2024-01-02T11:11:11.111111', '2024-01-03.2222222'])",
-      ArrayType(TimestampType, containsNull = false),
-      "class [Ljava.lang.Object; cannot be cast to class [Ljava.sql.Timestamp;"),
-    (
-      "floatColumn Array(Float32)",
-      "([(1.1), (2.2), (3.3), (4.4), (5.5)])",
-      ArrayType(FloatType, containsNull = false),
-      "class java.lang.Double cannot be cast to class java.lang.Float"),
-    (
       "UInt64Column Array(UInt64)",
       "([(1), (2), (3), (4), (5)])",
-      ArrayType(DecimalType(20, 0), containsNull = false),
-      "class [Ljava.lang.Object; cannot be cast to class [Ljava.math.BigDecimal;"))
+      ArrayType(DecimalType(38, 0), containsNull = false),
+      "class [Ljava.math.BigInteger; cannot be cast to class [Ljava.math.BigDecimal;"))
 
   forAll(
     if (driverVersion.startsWith("0.9")) testReadArrayUnsupportedCasesV0_9_X

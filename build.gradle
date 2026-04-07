@@ -41,6 +41,7 @@ dependencies {
     // Clickhouse dependency
     testImplementation ("com.clickhouse:clickhouse-jdbc:${project.properties['clickhouse.jdbc.version']}${project.properties['clickhouse.jdbc.version']?.startsWith('0.9') ? ':all' : ''}") {
         exclude group: "org.antlr", module: "antlr4-runtime"
+        exclude group: "at.yawk.lz4", module: "lz4-java"
     }
 }
 
