@@ -26,7 +26,7 @@ jobs:
 
     strategy:
       matrix:
-        clickhouse-jdbc-version: ['0.7.2', '0.9.2']
+        clickhouse-jdbc-version: ['0.7.2', '0.9.8']
 
     services:
       clickhouse:
@@ -61,7 +61,7 @@ jobs:
 
       - name: Run Integration Tests with Coverage
         run: |
-          ./gradlew test -Dclickhouse.jdbc.version=${{ matrix.clickhouse-jdbc-version }}
+          ./gradlew test -Pclickhouse.jdbc.version=${{ matrix.clickhouse-jdbc-version }}
 
       - name: Upload coverage results
         if: success() || failure()
@@ -99,6 +99,7 @@ jobs:
         id: coverage
         uses: madrapps/jacoco-report@v1.7.2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           paths: ${{ github.workspace }}/build/reports/jacoco/test/*.xml
           min-coverage-overall: ${{ env.MIN_PROJECT_COVERAGE }}
           min-coverage-changed-files: ${{ env.MIN_FILE_COVERAGE }}
