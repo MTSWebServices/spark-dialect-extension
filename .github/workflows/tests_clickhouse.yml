@@ -61,7 +61,7 @@ jobs:
 
       - name: Run Integration Tests with Coverage
         run: |
-          ./gradlew test -Dclickhouse.jdbc.version=${{ matrix.clickhouse-jdbc-version }}
+          ./gradlew test -Pclickhouse.jdbc.version=${{ matrix.clickhouse-jdbc-version }}
 
       - name: Upload coverage results
         if: success() || failure()
