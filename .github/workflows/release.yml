@@ -6,7 +6,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    if: github.repository == 'MobileTeleSystems/spark-dialect-extension'  # prevent running on forks
+    if: github.repository == 'MTSWebServices/spark-dialect-extension'  # prevent running on forks
 
     permissions:
       contents: write # to create Github release

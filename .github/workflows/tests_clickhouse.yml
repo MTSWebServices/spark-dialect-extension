@@ -9,19 +9,29 @@ on:
       - master
   workflow_dispatch:
 
-permissions:
-  contents: read
+env:
+  DEFAULT_JAVA: '11'
+  MIN_PROJECT_COVERAGE: 80
+  MIN_FILE_COVERAGE: 80
 
 jobs:
-  build:
+  tests:
     name: Tests
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
     strategy:
       matrix:
         clickhouse-jdbc-version: ['0.7.2', '0.9.2']
+
     services:
       clickhouse:
-        image: clickhouse/clickhouse-server:latest-alpine
+        # https://github.com/ClickHouse/clickhouse-java/issues/2636
+        image: clickhouse/clickhouse-server:25.9-alpine
         env:
           TZ: UTC
           CLICKHOUSE_DB: spark
@@ -34,10 +44,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup JDK 11
+      - name: Setup JDK ${{ env.DEFAULT_JAVA }}
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '${{ env.DEFAULT_JAVA }}'
           distribution: 'temurin'
 
       - name: Setup Gradle
@@ -53,9 +63,56 @@ jobs:
         run: |
           ./gradlew test -Dclickhouse.jdbc.version=${{ matrix.clickhouse-jdbc-version }}
 
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v4
+      - name: Upload coverage results
+        if: success() || failure()
+        uses: actions/upload-artifact@v7
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: build/reports/jacoco/test/*.xml
-          fail_ci_if_error: true
+          name: coverage-jdbc-${{ matrix.clickhouse-jdbc-version }}
+          path: build/reports/jacoco/test/*.xml
+          # https://github.com/actions/upload-artifact/issues/602
+          include-hidden-files: true
+
+  all_done:
+    name: Tests done
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      checks: write
+      pull-requests: write
+
+    if: success() || failure()
+    needs: [tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Download all coverage reports
+        uses: actions/download-artifact@v8
+        with:
+          path: build/reports/
+          pattern: coverage-*
+          merge-multiple: true
+
+      - name: Coverage comment
+        id: coverage
+        uses: madrapps/jacoco-report@v1.7.2
+        with:
+          paths: ${{ github.workspace }}/build/reports/jacoco/test/*.xml
+          min-coverage-overall: ${{ env.MIN_PROJECT_COVERAGE }}
+          min-coverage-changed-files: ${{ env.MIN_FILE_COVERAGE }}
+          title: Coverage
+          update-comment: true
+          skip-if-no-changes: true
+
+      - name: Dynamic Badges
+        uses: schneegans/dynamic-badges-action@v1.8.0
+        if: github.repository == 'MTSWebServices/spark-dialect-extension' && github.event_name == 'push'
+        with:
+          auth: ${{ secrets.AUTOMERGE_TOKEN }}
+          gistID: 03e73a82ecc4709934540ce8201cc3b4
+          filename: spark-dialect-extension_badge.json
+          label: Coverage
+          message: ${{ steps.coverage.outputs.coverage-overall }}
+          color: ${{ (steps.coverage.outputs.coverage-overall < env.MIN_PROJECT_COVERAGE || steps.coverage.outputs.coverage-changed-files < env.MIN_FILE_COVERAGE) && 'red' || 'green' }}

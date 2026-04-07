@@ -1,12 +1,45 @@
-# Contributing to Spark Dialect Extension
+# Contributing Guide
 
-This document provides detailed steps to build the Spark Dialect Extension from the source code.
+Welcome! There are many ways to contribute, including submitting bug
+reports, improving documentation, submitting feature requests, reviewing
+new submissions, or contributing code that can be incorporated into the
+project.
 
-### Prerequisites
+## Review process
+
+For any **significant** changes please create a new GitHub issue and
+enhancements that you wish to make. Describe the feature you would like
+to see, why you need it, and how it will work. Discuss your ideas
+transparently and get community feedback before proceeding.
+
+Small changes can directly be crafted and submitted to the GitHub
+Repository as a Pull Request. This requires creating a **repo fork** using
+[instruction](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
+
+## Initial setup for local development
+
+### Install Git
+
+Please follow
+[instruction](https://docs.github.com/en/get-started/quickstart/set-up-git).
+
+### Clone the repo
+
+Open terminal and run these commands:
+
+```bash
+git clone git@github.com:myuser/spark-dialect-extension.git
+
+cd spark-dialect-extension
+```
+
+### Setup environment
 
 Before you start, ensure you have the following installed:
 - **Java**: Java 8 or higher. [Java Installation Guide](https://adoptopenjdk.net/)
 - **Gradle**: [Gradle Installation Guide](https://docs.gradle.org/current/userguide/installation.html)
+
+# How to
 
 ### Compile the Project
 
@@ -18,8 +51,7 @@ To compile the project and generate a JAR file, run the following command in the
 
 This command compiles the source code and packages it into a .jar files located in the ``build/libs`` directory.
 
-
-## Running Scala Tests
+## Run Scala Tests
 
 This section describes how to run Scala tests for the Spark Dialect Extension.
 
@@ -48,7 +80,7 @@ After completing the tests, you can stop the Docker containers with:
 docker-compose -f docker-compose.test.yml down
 ```
 
-## Code Formatting and Linting
+## Format and lint the code
 
 ### Using Scalafmt to Format Code
 
@@ -65,9 +97,24 @@ To lint and refactor the code, run Scalafix using the following command:
 ```
 This command checks the code against various rules specified in the ```.scalafix.conf``` file and applies fixes where possible.
 
+## Create a pull request
 
-## Release process
+Commit your changes:
 
+```bash
+git commit -m "Commit message"
+git push
+```
+
+Then open Github interface and [create pull request](https://docs.github.com/en/get-started/quickstart/contributing-to-projects#making-a-pull-request).
+Please follow guide from PR body template.
+
+After pull request is created, it get a corresponding number, e.g. 123
+(`pr_number`).
+
+## Release a new package version
+
+Note: this is only for repo maintainers
 
 1. Checkout to ``develop`` branch and update it to the actual state
 
