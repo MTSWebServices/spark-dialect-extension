@@ -99,6 +99,7 @@ jobs:
         id: coverage
         uses: madrapps/jacoco-report@v1.7.2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           paths: ${{ github.workspace }}/build/reports/jacoco/test/*.xml
           min-coverage-overall: ${{ env.MIN_PROJECT_COVERAGE }}
           min-coverage-changed-files: ${{ env.MIN_FILE_COVERAGE }}
