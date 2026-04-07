@@ -5,7 +5,7 @@
 * Added tests for Clickhouse JDBC 0.9.5+.
 
   This JDBC driver version allows using `Array(T)` for almost all `T`, including `Float32`, `Date`, `DateTime` and `Decimal`.
-  Except for `UInt64` - issue on Spark side.
+  Except for `UInt64` - there is an issue on Spark side.
 
 * Convert `UInt64` to `Decimalype(38, 0)` instead of `DecimalType(20, 0)` (Spark's default).
 
