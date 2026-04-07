@@ -111,7 +111,7 @@ mavenPublishing {
     pom {
         name = "spark-dialect-extension"
         description = "Spark dialect extension for enhanced type handling"
-        url = "https://theplatform.ru/platforms/dataops"
+        url = "https://mws.ru/data/mws-data-bridge/"
         inceptionYear = "2024"
         licenses {
             license {
@@ -123,7 +123,7 @@ mavenPublishing {
         developers {
             developer {
                 id = "doetl"
-                name = "DataOps.ETL"
+                name = "MWS Data Bridge"
                 email = "onetools@mts.ru"
             }
         }
