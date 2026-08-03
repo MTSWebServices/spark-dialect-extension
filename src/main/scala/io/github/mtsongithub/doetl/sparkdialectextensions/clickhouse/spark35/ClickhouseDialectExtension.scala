@@ -68,7 +68,7 @@ private object ClickhouseDialectExtension extends JdbcDialect {
   private def toCatalystType(typeName: String): Option[(Boolean, DataType)] = {
     val (nullable, _typeName) = unwrapNullable(typeName)
     val dataType = _typeName match {
-      case "String" =>
+      case "String" | "IPv4" | "IPv6" | "UUID" =>
         logger.debug(s"Custom mapping applied: StringType for '${_typeName}'")
         Some(StringType)
       case "Int8" =>
