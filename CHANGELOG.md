@@ -1,3 +1,9 @@
+## 0.0.5 (2026-08-03)
+
+### Improvements
+
+On Clickhouse JDBC 0.9.x types `UUID`, `IPv4`, `IPv6` are threated as Spark `StringType()` instead of raising an exception.
+
 ## 0.0.4 (2026-04-07)
 
 ### Features
