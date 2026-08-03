@@ -116,4 +116,4 @@ jobs:
           filename: spark-dialect-extension_badge.json
           label: Coverage
           message: ${{ steps.coverage.outputs.coverage-overall }}
-          color: ${{ (steps.coverage.outputs.coverage-overall < env.MIN_PROJECT_COVERAGE || steps.coverage.outputs.coverage-changed-files < env.MIN_FILE_COVERAGE) && 'red' || 'green' }}
+          color: ${{ steps.coverage.outputs.coverage-overall < env.MIN_PROJECT_COVERAGE && 'red' || 'green' }}

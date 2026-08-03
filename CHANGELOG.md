@@ -1,15 +1,29 @@
+## 0.0.5 (2026-08-03)
+
+### Improvements
+
+On Clickhouse JDBC 0.9.x types `UUID`, `IPv4`, `IPv6` are threated as Spark `StringType()` instead of raising an exception.
+
 ## 0.0.4 (2026-04-07)
 
-* Added support for `df.write.format("jdbc").option("truncate", "true")`
+### Features
 
-* Added tests for Clickhouse JDBC 0.9.5+.
+Added support for `df.write.format("jdbc").option("truncate", "true")`
 
-  This JDBC driver version allows using `Array(T)` for almost all `T`, including `Float32`, `Date`, `DateTime` and `Decimal`.
-  Except for `UInt64` - there is an issue on Spark side.
+### Improvements
 
-* Convert `UInt64` to `Decimalype(38, 0)` instead of `DecimalType(20, 0)` (Spark's default).
+Added tests for Clickhouse JDBC 0.9.5+.
+
+This JDBC driver version allows using `Array(T)` for almost all `T`, including `Float32`, `Date`, `DateTime` and `Decimal`, see https://github.com/ClickHouse/clickhouse-java/pull/2627.
+Except for `UInt64` - there is an issue on Spark side.
+
+### Bug fixes
+
+Convert `UInt64` to `Decimalype(38, 0)` instead of `DecimalType(20, 0)` (Spark's default).
 
 ## 0.0.3 (2025-10-31)
+
+### Features
 
 * Added support for Clickhouse JDBC 0.9.2+.
 
@@ -38,6 +52,8 @@
 
 ## 0.0.2 (2024-10-02)
 
+### Features
+
 * Allow writing `ArrayType(TimestampType())` Spark column as Clickhouse's `Array(DateTime64(6))`.
 * Allow writing `ArrayType(ShortType())` Spark column as Clickhouse's `Array(Int16)`.
 
@@ -45,7 +61,7 @@
 
 First release! 🎉
 
-This version includes custom Clickhouse dialect for Apache Spark 3.5.x, with following enhancements:
+This version includes custom Clickhouse dialect for Apache Spark 3.5.x, with following features:
 * support for writing Spark's `ArrayType` to Clickhouse. Currently [only few types](https://github.com/ClickHouse/clickhouse-java/issues/1754) are supported, like `ArrayType(StringType)`, `ArrayType(ByteType)`, `ArrayType(LongType)`, `ArrayType(FloatType)`. Unfortunately, reading Arrays from Clickhouse to Spark is not fully supported for now.
 * fixed issue when writing Spark's `TimestampType` lead to creating Clickhouse table with `DateTime64(0)` instead of `DateTime64(6)`, resulting a precision loss (fractions of seconds were dropped).
 * fixed issue when writing Spark's `BooleanType` lead to creating Clickhouse table with `UInt64` column instead of `Bool`.
