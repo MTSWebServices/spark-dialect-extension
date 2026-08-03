@@ -508,9 +508,7 @@ class ClickhouseDialectTest
 
   test("read ClickHouse IPv4 as Spark StringType") {
     setupTable("ipv4Column IPv4")
-    insertTestData(
-      Seq("('0.0.0.0')", "('255.255.255.255')")
-    )
+    insertTestData(Seq("('0.0.0.0')", "('255.255.255.255')"))
 
     val df = spark.read
       .format("jdbc")
@@ -528,9 +526,7 @@ class ClickhouseDialectTest
 
   test("read ClickHouse IPv6 as Spark StringType") {
     setupTable("ipv6Column IPv6")
-    insertTestData(
-      Seq("('2001:db8::42')", "('dbd6:a34d:7835:c75:304f:6c73:edac:957b')")
-    )
+    insertTestData(Seq("('2001:db8::42')", "('dbd6:a34d:7835:c75:304f:6c73:edac:957b')"))
 
     val df = spark.read
       .format("jdbc")
@@ -543,17 +539,14 @@ class ClickhouseDialectTest
     assert(df.schema.fields.head.dataType == StringType)
 
     val data = df.collect().map(_.getString(0)).sorted
-    assert(data sameElements Array(
-      "2001:db8:0:0:0:0:0:42",
-      "dbd6:a34d:7835:c75:304f:6c73:edac:957b")
-    )
+    assert(
+      data sameElements Array("2001:db8:0:0:0:0:0:42", "dbd6:a34d:7835:c75:304f:6c73:edac:957b"))
   }
 
   test("read ClickHouse UUID as Spark StringType") {
     setupTable("uuidColumn UUID")
     insertTestData(
-      Seq("('483971cf-aad7-4c84-abf1-4a94c9d72f99')", "('8f3c71a9-b4d2-40e1-95c8-63a2b74051f9')")
-    )
+      Seq("('483971cf-aad7-4c84-abf1-4a94c9d72f99')", "('8f3c71a9-b4d2-40e1-95c8-63a2b74051f9')"))
 
     val df = spark.read
       .format("jdbc")
@@ -566,10 +559,10 @@ class ClickhouseDialectTest
     assert(df.schema.fields.head.dataType == StringType)
 
     val data = df.collect().map(_.getString(0)).sorted
-    assert(data sameElements Array(
-      "483971cf-aad7-4c84-abf1-4a94c9d72f99",
-      "8f3c71a9-b4d2-40e1-95c8-63a2b74051f9")
-    )
+    assert(
+      data sameElements Array(
+        "483971cf-aad7-4c84-abf1-4a94c9d72f99",
+        "8f3c71a9-b4d2-40e1-95c8-63a2b74051f9"))
   }
 
   test("read ClickHouse DateTime as Spark TimestampType") {
